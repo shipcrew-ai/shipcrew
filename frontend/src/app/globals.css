@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+/* Light theme (default) */
+:root {
+  --color-bg: #ffffff;
+  --color-sidebar: #f8f7fa;
+  --color-hover: #f0eef3;
+  --color-active: #1164A3;
+  --color-text: #1d1c1d;
+  --color-text-secondary: #b0b0b0;
+  --color-muted: #616061;
+  --color-border: #dddddd;
+  --color-input: #f4f4f5;
+  --color-surface: #ffffff;
+  --color-code-bg: #f4f4f5;
+  --color-pre-bg: #f8f8f8;
+  --color-scrollbar: #c0c0c0;
+  --color-scrollbar-hover: #a0a0a0;
+  --color-avatar-border: #f8f7fa;
+  --color-stream-bg: rgba(0, 0, 0, 0.02);
+  --color-msg-hover: rgba(0, 0, 0, 0.03);
+  --color-send-hover: rgba(0, 0, 0, 0.1);
+  --color-heading: #1d1c1d;
+}
+
+/* Dark theme */
+.dark {
+  --color-bg: #1a1d21;
+  --color-sidebar: #19171d;
+  --color-hover: #27242c;
+  --color-active: #1164A3;
+  --color-text: #d1d2d3;
+  --color-text-secondary: #b0b0b0;
+  --color-muted: #8a8b8c;
+  --color-border: #3d3d3d;
+  --color-input: #282c32;
+  --color-surface: #1e2227;
+  --color-code-bg: #282c32;
+  --color-pre-bg: #1e2227;
+  --color-scrollbar: #3d3d3d;
+  --color-scrollbar-hover: #5a5a5a;
+  --color-avatar-border: #19171d;
+  --color-stream-bg: rgba(255, 255, 255, 0.02);
+  --color-msg-hover: rgba(255, 255, 255, 0.03);
+  --color-send-hover: rgba(255, 255, 255, 0.1);
+  --color-heading: #ffffff;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-hover);
+}
+
+/* Markdown in messages */
+.prose-chat code {
+  background: var(--color-code-bg);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+.prose-chat pre {
+  background: var(--color-pre-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.prose-chat pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.875rem;
+}
+.prose-chat p {
+  margin: 4px 0;
+}
+.prose-chat ul, .prose-chat ol {
+  padding-left: 20px;
+  margin: 4px 0;
+}
+.prose-chat blockquote {
+  border-left: 3px solid var(--color-border);
+  padding-left: 12px;
+  color: var(--color-muted);
+  margin: 4px 0;
+}
+
+/* Typing animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: currentColor;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 1s ease-in-out infinite;
+}
+
+/* Bounce dots */
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+.dot-bounce {
+  display: inline-block;
+  animation: bounce-dot 1.2s ease-in-out infinite;
+}
+.dot-bounce:nth-child(2) { animation-delay: 0.15s; }
+.dot-bounce:nth-child(3) { animation-delay: 0.3s; }

@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id                 String              @id @default(uuid())
+  name               String
+  description        String?
+  sandboxPath        String
+  interactionMode    String              @default("newbie")
+  notificationConfig Json?
+  webhookToken       String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  agents             Agent[]
+  channels           Channel[]
+  tasks              Task[]
+  agentMemories      AgentMemory[]
+  scheduledTasks     ScheduledTask[]
+  webhookLogs        WebhookLog[]
+}
+
+model Agent {
+  id            String      @id @default(uuid())
+  projectId     String
+  role          String
+  name          String
+  title         String
+  avatar        String
+  color         String
+  status        String      @default("idle")
+  statusMessage String?
+  sessionId     String?
+  isCustom      Boolean     @default(false)
+  systemPrompt  String?
+  skills        String[]    @default([])
+  channels      String[]    @default([])
+  mentionName   String?
+  timeoutMs     Int         @default(120000)
+  maxTurns      Int         @default(25)
+  maxBudgetUsd  Float       @default(1.0)
+  createdAt     DateTime    @default(now())
+
+  project                Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages               Message[]
+  tasksAssigned          Task[]          @relation("TaskAssignee")
+  tasksCreated           Task[]          @relation("TaskCreator")
+  memories               AgentMemory[]
+  scheduledTasksAssigned ScheduledTask[] @relation("ScheduledTaskAssignee")
+  scheduledTasksCreated  ScheduledTask[] @relation("ScheduledTaskCreator")
+
+  @@unique([projectId, mentionName])
+  @@index([projectId, role])
+}
+
+model Channel {
+  id          String    @id @default(uuid())
+  projectId   String
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages       Message[]
+  scheduledTasks ScheduledTask[]
+
+  @@unique([projectId, name])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  channelId String
+  role      String
+  agentId   String?
+  content   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  @@index([channelId, createdAt])
+}
+
+model Task {
+  id               String     @id @default(uuid())
+  projectId        String
+  title            String
+  description      String?
+  status           String     @default("todo")
+  assigneeAgentId  String?
+  createdByAgentId String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee   Agent?  @relation("TaskAssignee", fields: [assigneeAgentId], references: [id], onDelete: SetNull)
+  createdBy  Agent?  @relation("TaskCreator", fields: [createdByAgentId], references: [id], onDelete: SetNull)
+}
+
+model AgentMemory {
+  id        String   @id @default(uuid())
+  projectId String
+  agentId   String
+  key       String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  agent   Agent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, key])
+}
+
+model ScheduledTask {
+  id                   String    @id @default(uuid())
+  projectId            String
+  assigneeAgentId      String
+  createdByAgentId     String
+  channelId            String
+  title                String
+  prompt               String
+  scheduleType         String
+  scheduleValue        String
+  nextRun              DateTime?
+  status               String    @default("active")
+  consecutiveFailures  Int       @default(0)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  project    Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee   Agent               @relation("ScheduledTaskAssignee", fields: [assigneeAgentId], references: [id])
+  createdBy  Agent               @relation("ScheduledTaskCreator", fields: [createdByAgentId], references: [id])
+  channel    Channel             @relation(fields: [channelId], references: [id])
+  runs       ScheduledTaskRun[]
+
+  @@index([status, nextRun])
+}
+
+model ScheduledTaskRun {
+  id              String   @id @default(uuid())
+  scheduledTaskId String
+  status          String
+  durationMs      Int
+  output          String?
+  error           String?
+  createdAt       DateTime @default(now())
+
+  scheduledTask ScheduledTask @relation(fields: [scheduledTaskId], references: [id], onDelete: Cascade)
+}
+
+model WebhookLog {
+  id             String   @id @default(uuid())
+  projectId      String
+  endpoint       String
+  method         String
+  headers        Json
+  body           Json
+  idempotencyKey String?
+  status         String
+  responseCode   Int
+  createdAt      DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@unique([idempotencyKey])
+}

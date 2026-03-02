@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.env.local
+.DS_Store
+*.log
+/tmp/devteam-sandboxes/
+prisma/migrations/dev.db
+.next/
+out/
