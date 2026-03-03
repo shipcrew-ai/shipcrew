@@ -24,7 +24,7 @@ export function ChannelView({ channelId, channelName, projectId }: Props) {
   useEffect(() => {
     apiFetch<Message[]>(`/api/channels/${channelId}/messages?limit=50`)
       .then((msgs) => setMessages(channelId, msgs))
-      .catch(console.error);
+      .catch((err) => console.error("[ChannelView] Failed to load messages:", err));
   }, [channelId, setMessages]);
 
   // Join socket room

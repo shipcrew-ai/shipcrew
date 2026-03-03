@@ -41,7 +41,7 @@ export function Header() {
       );
       setActiveProject(updated);
     } catch (err) {
-      console.error("Failed to toggle mode:", err);
+      console.error("[Header] Failed to toggle interaction mode:", err);
     }
   };
 
