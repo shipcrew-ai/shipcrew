@@ -3,7 +3,7 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents,
 } from "@devteam/shared";
-import { getToken } from "./api";
+import { getToken } from "./auth";
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
