@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { TaskPanel } from "@/components/layout/TaskPanel";
 import { FilesPanel } from "@/components/files/FilesPanel";
 import { ChannelView } from "@/components/chat/ChannelView";
+import { WelcomeScreen } from "@/components/onboarding/WelcomeScreen";
 import type { Project, Channel, Agent, Task } from "@devteam/shared";
 
 interface ProjectFull extends Project {
@@ -18,6 +19,7 @@ interface ProjectFull extends Project {
 
 export default function Home() {
   const {
+    projects,
     setProjects,
     setActiveProject,
     activeProject,
@@ -31,6 +33,7 @@ export default function Home() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -49,14 +52,9 @@ export default function Home() {
         const projects = await apiFetch<ProjectFull[]>("/api/projects");
 
         if (projects.length === 0) {
-          const newProject = await apiFetch<ProjectFull>("/api/projects", {
-            method: "POST",
-            body: JSON.stringify({
-              name: "My First Project",
-              description: "Get started by typing a message in #general",
-            }),
-          });
-          projects.push(newProject);
+          setShowWelcome(true);
+          setLoading(false);
+          return;
         }
 
         const project = projects[0];
@@ -106,6 +104,22 @@ export default function Home() {
           </p>
         </div>
       </div>
+    );
+  }
+
+  if (showWelcome || (projects.length === 0 && !loading)) {
+    return (
+      <WelcomeScreen
+        onProjectCreated={(project) => {
+          setProjects([project]);
+          setActiveProject(project);
+          setAgents(project.agents);
+          setChannels(project.channels);
+          const general = project.channels.find((c) => c.name === "general");
+          setActiveChannelId(general?.id ?? project.channels[0].id);
+          setShowWelcome(false);
+        }}
+      />
     );
   }
 
