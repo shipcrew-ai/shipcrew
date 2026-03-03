@@ -9,8 +9,8 @@ declare global {
   }
 }
 
-const SKIP_PATHS = ["/health"];
-const SKIP_PREFIXES = ["/api/auth/"];
+const SKIP_PATHS = ["/health", "/api/auth/register", "/api/auth/login"];
+const SKIP_PREFIXES = ["/hooks/"];
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   if (SKIP_PATHS.includes(req.path)) return next();

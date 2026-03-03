@@ -8,6 +8,7 @@ import {
 } from "@devteam/shared";
 import { provisionSandbox } from "../lib/sandbox.js";
 import { toJsonString } from "../lib/json-fields.js";
+import { hashPassword } from "../auth/hash.js";
 
 async function seed() {
   console.log("🌱 Seeding default project...");
@@ -21,6 +22,16 @@ async function seed() {
     return;
   }
 
+  // Create or find default user
+  let user = await prisma.user.findUnique({ where: { email: "admin@shipcrew.dev" } });
+  if (!user) {
+    const passwordHash = await hashPassword("password123");
+    user = await prisma.user.create({
+      data: { email: "admin@shipcrew.dev", passwordHash, name: "Admin" },
+    });
+    console.log(`👤 Created default user: admin@shipcrew.dev / password123`);
+  }
+
   const sandboxPath = await provisionSandbox("my-first-project");
 
   const project = await prisma.project.create({
@@ -28,6 +39,7 @@ async function seed() {
       name: "My First Project",
       description: "Get started by typing a message in #general",
       sandboxPath,
+      userId: user.id,
     },
   });
 
