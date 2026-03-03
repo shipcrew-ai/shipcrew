@@ -114,7 +114,7 @@ export function Sidebar() {
                     } else {
                       apiFetch<ProjectFull>(`/api/projects/${p.id}`)
                         .then(switchProject)
-                        .catch(console.error);
+                        .catch((err) => console.error("[Sidebar] Failed to load project:", err));
                     }
                   }}
                   className={clsx(
