@@ -9,6 +9,7 @@ import {
 } from "@devteam/shared";
 import { z } from "zod";
 import crypto from "crypto";
+import { toJsonString } from "../lib/json-fields.js";
 
 export const projectsRouter = Router();
 
@@ -65,8 +66,8 @@ projectsRouter.post("/", async (req, res) => {
         avatar: def.avatar,
         color: def.color,
         mentionName: def.mentionName,
-        skills: def.skills,
-        channels: def.channels,
+        skills: toJsonString(def.skills),
+        channels: toJsonString(def.channels),
         timeoutMs: def.timeoutMs,
         maxTurns: def.maxTurns,
         maxBudgetUsd: def.maxBudgetUsd,
