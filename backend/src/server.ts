@@ -127,7 +127,7 @@ io.on("connection", (socket) => {
 async function start() {
   // Test DB connection
   await prisma.$connect();
-  console.log("[DB] Connected to PostgreSQL");
+  console.log("[DB] Connected to database");
 
   // Recover orphaned scheduled tasks from previous crash
   await recoverOrphanedTasks();

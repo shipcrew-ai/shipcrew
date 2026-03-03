@@ -4,13 +4,13 @@
   "type": "module",
   "main": "./dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "dotenv -e ../.env -- tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "db:push": "prisma db push",
-    "db:seed": "tsx src/db/seed.ts",
-    "db:studio": "prisma studio",
-    "db:generate": "prisma generate"
+    "db:push": "dotenv -e ../.env -- prisma db push",
+    "db:seed": "dotenv -e ../.env -- tsx src/db/seed.ts",
+    "db:studio": "dotenv -e ../.env -- prisma studio",
+    "db:generate": "dotenv -e ../.env -- prisma generate"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "0.2.63",
@@ -21,11 +21,11 @@
     "dockerode": "^4.0.2",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "nodemailer": "^8.0.1",
     "node-cron": "^3.0.3",
+    "nodemailer": "^8.0.1",
     "socket.io": "^4.8.1",
-    "web-push": "^3.6.7",
     "uuid": "^11.0.3",
+    "web-push": "^3.6.7",
     "zod": "^4.0.0"
   },
   "devDependencies": {
@@ -33,10 +33,11 @@
     "@types/dockerode": "^3.3.32",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.10",
-    "@types/nodemailer": "^6.4.17",
     "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^6.4.17",
     "@types/uuid": "^10.0.0",
     "@types/web-push": "^3.6.3",
+    "dotenv-cli": "^11.0.0",
     "prisma": "^5.22.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
