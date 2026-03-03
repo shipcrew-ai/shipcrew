@@ -1,11 +1,12 @@
 ---
 name: removedocker
-status: backlog
+status: completed
 created: 2026-03-03T04:05:19Z
-progress: 0%
+progress: 100%
 prd: .claude/prds/removedocker.md
 github: https://github.com/shipcrew-ai/shipcrew/issues/3
-updated: 2026-03-03T04:10:18Z
+updated: 2026-03-03T04:56:19Z
+completed: 2026-03-03T04:56:19Z
 ---
 
 # Epic: Remove Docker Requirement + Switch to SQLite
@@ -86,12 +87,12 @@ Replace the PostgreSQL + Redis Docker requirement with SQLite for local developm
 - Existing `docker-compose.yml` still works if someone wants PostgreSQL
 
 ## Tasks Created
-- [ ] #4 - Switch Prisma schema to SQLite with JSON array fields (parallel: false)
-- [ ] #5 - Create JSON field helper for array serialization (parallel: true)
-- [ ] #6 - Update backend code to use JSON helper for agent skills/channels (parallel: false, depends: #4, #5)
-- [ ] #7 - Remove Redis and update infrastructure config (parallel: true)
-- [ ] #8 - Add auto-setup scripts to root package.json (parallel: true, depends: #4)
-- [ ] #9 - Update README with simplified Quick Start (parallel: true, depends: #7, #8)
+- [x] #4 - Switch Prisma schema to SQLite with JSON array fields (parallel: false)
+- [x] #5 - Create JSON field helper for array serialization (parallel: true)
+- [x] #6 - Update backend code to use JSON helper for agent skills/channels (parallel: false, depends: #4, #5)
+- [x] #7 - Remove Redis and update infrastructure config (parallel: true)
+- [x] #8 - Add auto-setup scripts to root package.json (parallel: true, depends: #4)
+- [x] #9 - Update README with simplified Quick Start (parallel: true, depends: #7, #8)
 
 Total tasks: 6
 Parallel tasks: 4
