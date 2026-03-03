@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -39,8 +39,8 @@ model Agent {
   sessionId     String?
   isCustom      Boolean     @default(false)
   systemPrompt  String?
-  skills        String[]    @default([])
-  channels      String[]    @default([])
+  skills        String      @default("[]")
+  channels      String      @default("[]")
   mentionName   String?
   timeoutMs     Int         @default(120000)
   maxTurns      Int         @default(25)
