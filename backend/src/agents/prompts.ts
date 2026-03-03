@@ -1,12 +1,14 @@
 import type { AgentRecord } from "./config.js";
+import { parseJsonArray } from "../lib/json-fields.js";
 
 // ─── Dynamic Team Roster ─────────────────────────────────────────────────────
 
 function buildTeamRoster(projectAgents: AgentRecord[]): string {
   const lines = projectAgents.map((a) => {
     const mention = a.mentionName ? `@${a.mentionName}` : "";
-    const chans = a.channels.length
-      ? a.channels.map((c) => `#${c}`).join(", ")
+    const channels = parseJsonArray(a.channels as unknown as string);
+    const chans = channels.length
+      ? channels.map((c) => `#${c}`).join(", ")
       : "all channels";
     return `- **${a.name}** (${a.title}${mention ? `, ${mention}` : ""}) — works in ${chans}`;
   });
@@ -22,7 +24,7 @@ function buildChannelRules(_agent: AgentRecord, projectAgents: AgentRecord[]): s
   // Build per-agent workspace rules from channel assignments
   const seen = new Set<string>();
   for (const a of projectAgents) {
-    for (const ch of a.channels) {
+    for (const ch of parseJsonArray(a.channels as unknown as string)) {
       if (ch !== "general" && !seen.has(ch)) {
         seen.add(ch);
         lines.push(`- **#${ch}** is ${a.name}'s workspace for ${a.title.toLowerCase()} work.`);
@@ -100,8 +102,9 @@ export function generateSystemPrompt(
   const channelRules = buildChannelRules(agent, projectAgents);
   const skillInstructions = getSkillInstructions(agent.skills);
 
-  const workChannels = agent.channels.length
-    ? agent.channels.map((c) => `**#${c}**`).join(", ")
+  const agentChannels = parseJsonArray(agent.channels as unknown as string);
+  const workChannels = agentChannels.length
+    ? agentChannels.map((c) => `**#${c}**`).join(", ")
     : "any channel";
 
   return `You are ${agent.name}, the ${agent.title} on a collaborative AI development team.

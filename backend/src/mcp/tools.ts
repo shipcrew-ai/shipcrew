@@ -680,8 +680,8 @@ export function createCommonToolServer(agentId: string) {
             where: {
               projectId: ctx.projectId,
               OR: [
-                { key: { contains: query, mode: "insensitive" } },
-                { content: { contains: query, mode: "insensitive" } },
+                { key: { contains: query } },
+                { content: { contains: query } },
               ],
             },
             include: { agent: true },

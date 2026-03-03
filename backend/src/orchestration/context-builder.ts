@@ -42,8 +42,8 @@ export async function buildAgentContext(
       where: {
         projectId,
         OR: [
-          { key: { contains: currentMessage.slice(0, 50), mode: "insensitive" } },
-          { content: { contains: currentMessage.slice(0, 50), mode: "insensitive" } },
+          { key: { contains: currentMessage.slice(0, 50) } },
+          { content: { contains: currentMessage.slice(0, 50) } },
         ],
       },
       include: { agent: true },
