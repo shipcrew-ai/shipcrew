@@ -5,6 +5,7 @@ dist/
 .DS_Store
 *.log
 /tmp/devteam-sandboxes/
-prisma/migrations/dev.db
+*.db
+*.db-journal
 .next/
 out/

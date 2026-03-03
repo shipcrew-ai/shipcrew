@@ -9,6 +9,21 @@ import {
 } from "@devteam/shared";
 import { z } from "zod";
 import crypto from "crypto";
+import { toJsonString, toJson, parseJson, parseJsonArray } from "../lib/json-fields.js";
+
+function formatProject(project: any) {
+  return {
+    ...project,
+    notificationConfig: parseJson(project.notificationConfig),
+    ...(project.agents && {
+      agents: project.agents.map((a: any) => ({
+        ...a,
+        skills: parseJsonArray(a.skills),
+        channels: parseJsonArray(a.channels),
+      })),
+    }),
+  };
+}
 
 export const projectsRouter = Router();
 
@@ -18,7 +33,7 @@ projectsRouter.get("/", async (_req, res) => {
     include: { agents: true, channels: true },
     orderBy: { createdAt: "desc" },
   });
-  res.json(projects);
+  res.json(projects.map(formatProject));
 });
 
 // GET /api/projects/:id
@@ -28,7 +43,7 @@ projectsRouter.get("/:id", async (req, res) => {
     include: { agents: true, channels: true },
   });
   if (!project) return res.status(404).json({ error: "Not found" });
-  res.json(project);
+  res.json(formatProject(project));
 });
 
 // POST /api/projects
@@ -65,8 +80,8 @@ projectsRouter.post("/", async (req, res) => {
         avatar: def.avatar,
         color: def.color,
         mentionName: def.mentionName,
-        skills: def.skills,
-        channels: def.channels,
+        skills: toJsonString(def.skills),
+        channels: toJsonString(def.channels),
         timeoutMs: def.timeoutMs,
         maxTurns: def.maxTurns,
         maxBudgetUsd: def.maxBudgetUsd,
@@ -89,7 +104,7 @@ projectsRouter.post("/", async (req, res) => {
     include: { agents: true, channels: true },
   });
 
-  res.status(201).json(full);
+  res.status(201).json(formatProject(full));
 });
 
 // DELETE /api/projects/:id
@@ -115,16 +130,16 @@ projectsRouter.patch("/:id/interaction-mode", async (req, res) => {
     data: { interactionMode: mode },
     include: { agents: true, channels: true },
   });
-  res.json(project);
+  res.json(formatProject(project));
 });
 
 // PATCH /api/projects/:id/notifications
 projectsRouter.patch("/:id/notifications", async (req, res) => {
   const project = await prisma.project.update({
     where: { id: req.params.id },
-    data: { notificationConfig: req.body },
+    data: { notificationConfig: toJson(req.body) },
   });
-  res.json(project);
+  res.json(formatProject(project));
 });
 
 // POST /api/projects/:id/webhook-token

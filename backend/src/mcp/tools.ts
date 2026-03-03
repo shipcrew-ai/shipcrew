@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../db/client.js";
 import { emitToChannel, emitToProject } from "../lib/socket.js";
 import { getExecutionContext, queueTrigger } from "./context.js";
+import { parseJsonArray } from "../lib/json-fields.js";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -88,7 +89,7 @@ export function createPmToolServer(agentId: string) {
 
           // Queue trigger for assigned developer in their work channel
           if (assigneeAgent && ctx.depth < 10) {
-            const workChannelName = getWorkChannel(assigneeAgent.channels);
+            const workChannelName = getWorkChannel(parseJsonArray(assigneeAgent.channels));
             const channel = await prisma.channel.findFirst({
               where: { projectId: ctx.projectId, name: workChannelName },
             });
@@ -502,7 +503,7 @@ export function createReviewerToolServer(agentId: string) {
 
           // Trigger assigned developer with rejection reason in their work channel
           if (task.assignee && ctx.depth < 10) {
-            const workChannelName = getWorkChannel(task.assignee.channels);
+            const workChannelName = getWorkChannel(parseJsonArray(task.assignee.channels));
             const devChannel = await prisma.channel.findFirst({
               where: { projectId: ctx.projectId, name: workChannelName },
             });

@@ -4,6 +4,7 @@ import { emitToProject } from "../lib/socket.js";
 import { generateSystemPrompt } from "../agents/prompts.js";
 import type { AgentRecord } from "../agents/config.js";
 import { z } from "zod";
+import { parseJsonArray, toJsonString } from "../lib/json-fields.js";
 
 export const agentsRouter = Router();
 
@@ -13,7 +14,11 @@ agentsRouter.get("/projects/:projectId/agents", async (req, res) => {
     where: { projectId: req.params.projectId },
     orderBy: { createdAt: "asc" },
   });
-  res.json(agents);
+  res.json(agents.map((a) => ({
+    ...a,
+    skills: parseJsonArray(a.skills),
+    channels: parseJsonArray(a.channels),
+  })));
 });
 
 // POST /api/projects/:projectId/agents — create custom agent
@@ -60,8 +65,8 @@ agentsRouter.post("/projects/:projectId/agents", async (req, res) => {
       avatar: data.avatar,
       color: data.color,
       mentionName: data.mentionName,
-      skills: data.skills,
-      channels: data.channels,
+      skills: toJsonString(data.skills),
+      channels: toJsonString(data.channels),
       systemPrompt: data.systemPrompt ?? null,
       isCustom: true,
       timeoutMs: data.timeoutMs,
@@ -71,8 +76,9 @@ agentsRouter.post("/projects/:projectId/agents", async (req, res) => {
     },
   });
 
-  emitToProject(projectId, "agent.created", agent as any);
-  res.status(201).json(agent);
+  const agentOut = { ...agent, skills: parseJsonArray(agent.skills), channels: parseJsonArray(agent.channels) };
+  emitToProject(projectId, "agent.created", agentOut as any);
+  res.status(201).json(agentOut);
 });
 
 // PATCH /api/projects/:projectId/agents/:agentId — edit agent
@@ -124,8 +130,8 @@ agentsRouter.patch("/projects/:projectId/agents/:agentId", async (req, res) => {
       ...(data.avatar !== undefined && { avatar: data.avatar }),
       ...(data.color !== undefined && { color: data.color }),
       ...(data.mentionName !== undefined && { mentionName: data.mentionName }),
-      ...(data.skills !== undefined && { skills: data.skills }),
-      ...(data.channels !== undefined && { channels: data.channels }),
+      ...(data.skills !== undefined && { skills: toJsonString(data.skills) }),
+      ...(data.channels !== undefined && { channels: toJsonString(data.channels) }),
       ...(data.systemPrompt !== undefined && { systemPrompt: data.systemPrompt }),
       ...(data.timeoutMs !== undefined && { timeoutMs: data.timeoutMs }),
       ...(data.maxTurns !== undefined && { maxTurns: data.maxTurns }),
@@ -133,8 +139,9 @@ agentsRouter.patch("/projects/:projectId/agents/:agentId", async (req, res) => {
     },
   });
 
-  emitToProject(projectId, "agent.updated", agent as any);
-  res.json(agent);
+  const agentOut = { ...agent, skills: parseJsonArray(agent.skills), channels: parseJsonArray(agent.channels) };
+  emitToProject(projectId, "agent.updated", agentOut as any);
+  res.json(agentOut);
 });
 
 // DELETE /api/projects/:projectId/agents/:agentId
@@ -184,6 +191,7 @@ agentsRouter.post("/projects/:projectId/agents/:agentId/reset-prompt", async (re
     allAgents as unknown as AgentRecord[]
   );
 
-  emitToProject(projectId, "agent.updated", agent as any);
-  res.json({ agent, generatedPrompt: preview });
+  const agentOut = { ...agent, skills: parseJsonArray(agent.skills), channels: parseJsonArray(agent.channels) };
+  emitToProject(projectId, "agent.updated", agentOut as any);
+  res.json({ agent: agentOut, generatedPrompt: preview });
 });

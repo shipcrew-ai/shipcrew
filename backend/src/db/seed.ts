@@ -7,6 +7,7 @@ import {
   ALL_CHANNELS,
 } from "@devteam/shared";
 import { provisionSandbox } from "../lib/sandbox.js";
+import { toJsonString } from "../lib/json-fields.js";
 
 async function seed() {
   console.log("🌱 Seeding default project...");
@@ -41,6 +42,12 @@ async function seed() {
         title: def.title,
         avatar: def.avatar,
         color: def.color,
+        mentionName: def.mentionName,
+        skills: toJsonString(def.skills),
+        channels: toJsonString(def.channels),
+        timeoutMs: def.timeoutMs,
+        maxTurns: def.maxTurns,
+        maxBudgetUsd: def.maxBudgetUsd,
         status: "idle",
       },
     });

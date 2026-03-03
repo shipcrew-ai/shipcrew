@@ -7,6 +7,7 @@ import type { AgentRecord } from "../agents/config.js";
 import {
   buildAgentContext,
 } from "./context-builder.js";
+import { toJson, parseJson } from "../lib/json-fields.js";
 import {
   getStoredSessionId,
   persistSessionId,
@@ -275,7 +276,7 @@ export async function executeAgent(opts: ExecuteOptions): Promise<ExecuteResult>
           content: fullResponse.trim(),
           metadata:
             executionSource !== "user"
-              ? { autonomous: true, scheduled: executionSource === "scheduled", webhook: executionSource === "webhook", depth }
+              ? toJson({ autonomous: true, scheduled: executionSource === "scheduled", webhook: executionSource === "webhook", depth })
               : undefined,
         },
         include: { agent: true },
@@ -286,7 +287,8 @@ export async function executeAgent(opts: ExecuteOptions): Promise<ExecuteResult>
         agentId,
         channelId,
       });
-      emitToChannel(channelId, "message.new", savedMessage as any);
+      const savedMessageOut = { ...savedMessage, metadata: parseJson(savedMessage.metadata) };
+      emitToChannel(channelId, "message.new", savedMessageOut as any);
     }
 
     const triggers = drainTriggers(agentId);
@@ -321,11 +323,12 @@ export async function executeAgent(opts: ExecuteOptions): Promise<ExecuteResult>
         role: "assistant",
         agentId,
         content: `\u26a0\ufe0f ${errorMsg}`,
-        metadata: { autonomous: executionSource !== "user" },
+        metadata: toJson({ autonomous: executionSource !== "user" }),
       },
       include: { agent: true },
     });
-    emitToChannel(channelId, "message.new", errorMessage as any);
+    const errorMessageOut = { ...errorMessage, metadata: parseJson(errorMessage.metadata) };
+    emitToChannel(channelId, "message.new", errorMessageOut as any);
 
     throw err;
   } finally {

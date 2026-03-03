@@ -1,5 +1,6 @@
 import { prisma } from "../db/client.js";
 import type { RoutedAgent } from "@devteam/shared";
+import { parseJsonArray } from "../lib/json-fields.js";
 
 // @all / @team / @everyone routes to all agents
 const BROADCAST_MENTIONS = new Set(["all", "team", "everyone"]);
@@ -72,7 +73,7 @@ export async function routeMessage(
   if (routed.length === 0) {
     // Find agents that have this channel in their channels array
     const channelAgents = agents.filter((a) =>
-      a.channels.includes(channel.name)
+      parseJsonArray(a.channels).includes(channel.name)
     );
 
     if (channelAgents.length > 0) {

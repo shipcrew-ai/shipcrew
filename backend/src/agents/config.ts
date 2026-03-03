@@ -1,6 +1,7 @@
 import type { AgentSkill } from "@devteam/shared";
 import { SKILL_DEFINITIONS } from "@devteam/shared";
 import { SYSTEM_PROMPTS, generateSystemPrompt } from "./prompts.js";
+import { parseJsonArray } from "../lib/json-fields.js";
 
 export interface AgentConfig {
   role: string;
@@ -44,7 +45,7 @@ export function buildAgentConfigFromDb(
   agent: AgentRecord,
   projectAgents: AgentRecord[]
 ): AgentConfig {
-  const skills = agent.skills as AgentSkill[];
+  const skills = parseJsonArray(agent.skills as unknown as string) as AgentSkill[];
 
   // Collect SDK tools from skills (deduplicated)
   const sdkToolSet = new Set<string>();
@@ -91,7 +92,7 @@ export function buildAgentConfigFromDb(
     systemPrompt,
     allowedTools,
     mcpServerNames,
-    channels: agent.channels,
+    channels: parseJsonArray(agent.channels as unknown as string),
     timeoutMs: agent.timeoutMs,
     maxTurns: agent.maxTurns,
     maxBudgetUsd: agent.maxBudgetUsd,

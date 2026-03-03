@@ -13,6 +13,7 @@ import { channelsRouter } from "./api/channels.js";
 import { tasksRouter } from "./api/tasks.js";
 import { scheduledTasksRouter } from "./api/scheduled-tasks.js";
 import { agentsRouter } from "./api/agents.js";
+import { parseJson } from "./lib/json-fields.js";
 import { filesRouter } from "./api/files.js";
 import type {
   ClientToServerEvents,
@@ -59,7 +60,7 @@ app.get("/api/projects/:projectId/webhook-logs", async (req, res) => {
     orderBy: { createdAt: "desc" },
     take: parseInt(limit, 10),
   });
-  res.json(logs);
+  res.json(logs.map((l) => ({ ...l, headers: parseJson(l.headers), body: parseJson(l.body) })));
 });
 
 // ─── HTTP + Socket.io ─────────────────────────────────────────────────────────
@@ -126,7 +127,7 @@ io.on("connection", (socket) => {
 async function start() {
   // Test DB connection
   await prisma.$connect();
-  console.log("[DB] Connected to PostgreSQL");
+  console.log("[DB] Connected to database");
 
   // Recover orphaned scheduled tasks from previous crash
   await recoverOrphanedTasks();
