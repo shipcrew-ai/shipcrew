@@ -2,8 +2,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { apiFetch } from "@/lib/api";
 import { isAuthenticated, setToken } from "@/lib/auth";
+import { pageVariants } from "@/lib/motion";
 
 interface AuthResponse {
   token: string;
@@ -55,11 +57,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-slack-bg">
-      <div className="w-full max-w-sm animate-fade-in">
+    <div className="h-screen flex items-center justify-center bg-mesh relative noise">
+      <motion.div
+        variants={pageVariants}
+        initial="hidden"
+        animate="visible"
+        className="w-full max-w-sm glass-raised rounded-2xl p-8"
+      >
         <div className="text-center mb-8">
           <div className="text-4xl mb-2">🚀</div>
-          <h1 className="text-2xl font-bold text-slack-heading">ShipCrew</h1>
+          <h1 className="text-2xl font-bold text-gradient">ShipCrew</h1>
           <p className="text-slack-muted text-sm mt-1">Create your account</p>
         </div>
 
@@ -74,7 +81,7 @@ export default function RegisterPage() {
               onChange={(e) => setName(e.target.value)}
               required
               disabled={loading}
-              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent disabled:opacity-50"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:border-slack-active focus:shadow-[0_0_0_2px_var(--color-active-glow)] disabled:opacity-50 transition-all"
               placeholder="Your name"
             />
           </div>
@@ -89,7 +96,7 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
-              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent disabled:opacity-50"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:border-slack-active focus:shadow-[0_0_0_2px_var(--color-active-glow)] disabled:opacity-50 transition-all"
               placeholder="you@example.com"
             />
           </div>
@@ -105,7 +112,7 @@ export default function RegisterPage() {
               required
               minLength={6}
               disabled={loading}
-              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent disabled:opacity-50"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:border-slack-active focus:shadow-[0_0_0_2px_var(--color-active-glow)] disabled:opacity-50 transition-all"
               placeholder="Min 6 characters"
             />
           </div>
@@ -121,7 +128,7 @@ export default function RegisterPage() {
               required
               minLength={6}
               disabled={loading}
-              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent disabled:opacity-50"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:border-slack-active focus:shadow-[0_0_0_2px_var(--color-active-glow)] disabled:opacity-50 transition-all"
               placeholder="Repeat password"
             />
           </div>
@@ -131,7 +138,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 px-4 rounded-md bg-slack-active text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="w-full py-2 px-4 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium hover:from-indigo-400 hover:to-purple-400 disabled:opacity-50 transition-all"
           >
             {loading ? "Creating account..." : "Create Account"}
           </button>
@@ -143,7 +150,7 @@ export default function RegisterPage() {
             Sign in
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

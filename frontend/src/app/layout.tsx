@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className="h-screen overflow-hidden bg-slack-bg text-slack-text antialiased">
+      <body className="h-screen overflow-hidden bg-mesh relative noise text-slack-text antialiased">
         <ThemeSync />
         {children}
       </body>

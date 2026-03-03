@@ -25,10 +25,12 @@ export function AgentAvatar({ agent, size = "md", showStatus = true }: Props) {
   return (
     <div className={clsx("relative flex-shrink-0", SIZE[size])}>
       <div
-        className={clsx(
-          "w-full h-full rounded-lg flex items-center justify-center font-semibold"
-        )}
-        style={{ backgroundColor: agent.color + "33", color: agent.color }}
+        className="w-full h-full rounded-xl backdrop-blur-sm border border-white/10 flex items-center justify-center font-semibold"
+        style={{
+          backgroundColor: agent.color + "20",
+          color: agent.color,
+          boxShadow: `0 0 8px ${agent.color}20`,
+        }}
       >
         {agent.avatar}
       </div>
@@ -39,6 +41,7 @@ export function AgentAvatar({ agent, size = "md", showStatus = true }: Props) {
             STATUS_COLOR[agent.status as AgentStatus],
             agent.status === "thinking" && "animate-pulse"
           )}
+          style={{ boxShadow: "0 0 4px currentColor" }}
         />
       )}
     </div>
