@@ -8,9 +8,11 @@
     "frontend"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "setup": "test -f .env || cp .env.example .env && npm run db:generate && npm run db:push && npm run db:seed",
+    "dev": "test -f backend/prisma/dev.db && concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\" || npm run setup && concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "build": "npm run build -w shared && npm run build -w backend && npm run build -w frontend",
     "start": "npm run start -w backend",
+    "db:generate": "npm run db:generate -w backend",
     "db:push": "npm run db:push -w backend",
     "db:seed": "npm run db:seed -w backend",
     "db:studio": "npm run db:studio -w backend"
