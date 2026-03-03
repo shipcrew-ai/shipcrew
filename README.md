@@ -133,7 +133,7 @@ npm start                # Start backend server
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `ANTHROPIC_API_KEY` | Yes | — | Your Anthropic API key |
-| `DATABASE_URL` | No | `file:./prisma/dev.db` | Database connection (SQLite default, PostgreSQL supported) |
+| `DATABASE_URL` | No | `file:./dev.db` | Database connection (SQLite default, PostgreSQL supported) |
 | `PORT` | No | `8000` | Backend server port |
 | `SANDBOX_BASE_PATH` | No | `/tmp/devteam-sandboxes` | Docker sandbox volume path |
 | `SANDBOX_IMAGE` | No | `node:20-alpine` | Docker image for sandboxes |
