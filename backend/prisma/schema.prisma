@@ -13,7 +13,7 @@ model Project {
   description        String?
   sandboxPath        String
   interactionMode    String              @default("newbie")
-  notificationConfig Json?
+  notificationConfig String?
   webhookToken       String?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
@@ -79,7 +79,7 @@ model Message {
   role      String
   agentId   String?
   content   String
-  metadata  Json?
+  metadata  String?
   createdAt DateTime @default(now())
 
   channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
@@ -161,8 +161,8 @@ model WebhookLog {
   projectId      String
   endpoint       String
   method         String
-  headers        Json
-  body           Json
+  headers        String
+  body           String
   idempotencyKey String?
   status         String
   responseCode   Int

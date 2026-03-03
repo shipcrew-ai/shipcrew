@@ -2,6 +2,7 @@ import { prisma } from "../db/client.js";
 import { emitToChannel } from "../lib/socket.js";
 import { routeMessage } from "./router.js";
 import { enqueueTurn } from "./turn-manager.js";
+import { toJson, parseJson } from "../lib/json-fields.js";
 export interface PipelineInput {
   projectId: string;
   channelId: string;
@@ -38,13 +39,14 @@ export async function runPipeline(input: PipelineInput): Promise<void> {
       role: senderRole,
       agentId: senderRole === "user" ? null : senderId ?? null,
       content,
-      metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : undefined,
+      metadata: metadata ? toJson(metadata) : undefined,
     },
     include: { agent: true },
   });
 
   // 2. Broadcast the message to the channel
-  emitToChannel(channelId, "message.new", message as any);
+  const messageOut = { ...message, metadata: parseJson(message.metadata) };
+  emitToChannel(channelId, "message.new", messageOut as any);
 
   // 3. Route to agents
   const routed = await routeMessage(projectId, channelId, content);

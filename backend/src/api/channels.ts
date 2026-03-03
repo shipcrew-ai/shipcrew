@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../db/client.js";
+import { parseJson } from "../lib/json-fields.js";
 
 export const channelsRouter = Router();
 
@@ -26,5 +27,5 @@ channelsRouter.get("/channels/:channelId/messages", async (req, res) => {
     take: parseInt(limit, 10),
   });
 
-  res.json(messages);
+  res.json(messages.map((m) => ({ ...m, metadata: parseJson(m.metadata) })));
 });

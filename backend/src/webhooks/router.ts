@@ -3,6 +3,7 @@ import { prisma } from "../db/client.js";
 import { runPipeline } from "../orchestration/pipeline.js";
 import { timingSafeEqual } from "crypto";
 import { z } from "zod";
+import { toJson } from "../lib/json-fields.js";
 
 export const webhookRouter = Router();
 
@@ -46,7 +47,7 @@ async function checkIdempotency(
   projectId: string,
   key: string | undefined,
   endpoint: string,
-  headers: Record<string, string>,
+  headers: Record<string, string | string[] | undefined>,
   body: unknown,
   responseCode: number,
   status: string
@@ -62,8 +63,8 @@ async function checkIdempotency(
         projectId,
         endpoint,
         method: "POST",
-        headers,
-        body: body as any,
+        headers: toJson(headers),
+        body: toJson(body),
         idempotencyKey: null,
         status: "duplicate",
         responseCode: 200,
@@ -77,8 +78,8 @@ async function checkIdempotency(
       projectId,
       endpoint,
       method: "POST",
-      headers,
-      body: body as any,
+      headers: toJson(headers),
+      body: toJson(body),
       idempotencyKey: key,
       status,
       responseCode,
