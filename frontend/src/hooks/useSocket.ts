@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { getSocket } from "@/lib/socket";
+import { clearToken } from "@/lib/auth";
 import { useAppStore } from "@/store";
 
 export function useSocketEvents() {
@@ -81,6 +82,13 @@ export function useSocketEvents() {
       bumpFileTreeVersion();
     });
 
+    socket.on("connect_error", (err) => {
+      if (err.message === "Authentication required" || err.message === "Invalid token") {
+        clearToken();
+        window.location.href = "/login";
+      }
+    });
+
     return () => {
       socket.off("message.new");
       socket.off("message.stream");
@@ -91,6 +99,7 @@ export function useSocketEvents() {
       socket.off("agent.updated");
       socket.off("agent.deleted");
       socket.off("code.diff");
+      socket.off("connect_error");
     };
   }, [appendMessage, appendStreamToken, finalizeStream, updateAgentStatus, addAgent, updateAgent, removeAgent, upsertTask, bumpFileTreeVersion]);
 }
