@@ -28,8 +28,9 @@ function formatProject(project: any) {
 export const projectsRouter = Router();
 
 // GET /api/projects
-projectsRouter.get("/", async (_req, res) => {
+projectsRouter.get("/", async (req, res) => {
   const projects = await prisma.project.findMany({
+    where: { userId: req.user!.id },
     include: { agents: true, channels: true },
     orderBy: { createdAt: "desc" },
   });
@@ -65,7 +66,7 @@ projectsRouter.post("/", async (req, res) => {
   const sandboxPath = await provisionSandbox(slug);
 
   const project = await prisma.project.create({
-    data: { name, description, sandboxPath },
+    data: { name, description, sandboxPath, userId: req.user!.id },
   });
 
   // Provision agents with full skill/channel/mention data

@@ -15,6 +15,9 @@ import { scheduledTasksRouter } from "./api/scheduled-tasks.js";
 import { agentsRouter } from "./api/agents.js";
 import { parseJson } from "./lib/json-fields.js";
 import { filesRouter } from "./api/files.js";
+import { requireAuth } from "./auth/middleware.js";
+import { authRouter } from "./api/auth.js";
+import { verifyToken } from "./auth/jwt.js";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
@@ -37,6 +40,10 @@ app.get("/health", async (_req, res) => {
     ts: new Date().toISOString(),
   });
 });
+
+// Auth
+app.use(requireAuth);
+app.use("/api/auth", authRouter);
 
 // REST API
 app.use("/api/projects", projectsRouter);
@@ -78,6 +85,19 @@ const io = new SocketServer<ClientToServerEvents, ServerToClientEvents>(
 );
 
 setIo(io as any);
+
+// Socket.io auth middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) return next(new Error("Authentication required"));
+  try {
+    const decoded = verifyToken(token);
+    socket.data.userId = decoded.userId;
+    next();
+  } catch {
+    next(new Error("Invalid token"));
+  }
+});
 
 io.on("connection", (socket) => {
   console.log(`[Socket] Connected: ${socket.id}`);
