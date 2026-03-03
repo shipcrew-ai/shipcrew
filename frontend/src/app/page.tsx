@@ -1,13 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, getToken, clearToken } from "@/lib/api";
 import { useSocketEvents } from "@/hooks/useSocket";
+import { resetSocket } from "@/lib/socket";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { TaskPanel } from "@/components/layout/TaskPanel";
 import { FilesPanel } from "@/components/files/FilesPanel";
 import { ChannelView } from "@/components/chat/ChannelView";
+import { LoginForm } from "@/components/auth/LoginForm";
 import type { Project, Channel, Agent, Task } from "@devteam/shared";
 
 interface ProjectFull extends Project {
@@ -30,11 +32,23 @@ export default function Home() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
 
-  // Connect socket and register events
+  // Check for existing token on mount
+  useEffect(() => {
+    if (getToken()) {
+      setAuthenticated(true);
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  // Connect socket and register events (only when authenticated)
   useSocketEvents();
 
   useEffect(() => {
+    if (!authenticated) return;
+
     async function init() {
       try {
         const projects = await apiFetch<ProjectFull[]>("/api/projects");
@@ -67,14 +81,32 @@ export default function Home() {
         );
         setTasks(tasks);
       } catch (err) {
-        setError((err as Error).message);
+        const msg = (err as Error).message;
+        if (msg.includes("401")) {
+          clearToken();
+          setAuthenticated(false);
+          return;
+        }
+        setError(msg);
       } finally {
         setLoading(false);
       }
     }
 
     init();
-  }, []);
+  }, [authenticated]);
+
+  if (!authenticated) {
+    return (
+      <LoginForm
+        onSuccess={() => {
+          resetSocket();
+          setAuthenticated(true);
+          setLoading(true);
+        }}
+      />
+    );
+  }
 
   if (loading) {
     return (
