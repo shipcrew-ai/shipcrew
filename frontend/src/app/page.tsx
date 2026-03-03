@@ -4,11 +4,8 @@ import { useAppStore } from "@/store";
 import { apiFetch } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
 import { useSocketEvents } from "@/hooks/useSocket";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
-import { TaskPanel } from "@/components/layout/TaskPanel";
-import { FilesPanel } from "@/components/files/FilesPanel";
-import { ChannelView } from "@/components/chat/ChannelView";
+import { OfficeCanvas } from "@/components/office/OfficeCanvas";
+import { HudOverlay } from "@/components/hud/HudOverlay";
 import { WelcomeScreen } from "@/components/onboarding/WelcomeScreen";
 import { AgentEditorDialog } from "@/components/agents/AgentEditorDialog";
 import { NewProjectDialog } from "@/components/layout/NewProjectDialog";
@@ -29,7 +26,6 @@ export default function Home() {
     setAgents,
     setTasks,
     setActiveChannelId,
-    activeChannelId,
     channels,
     clearMessages,
     newProjectDialogOpen,
@@ -131,35 +127,10 @@ export default function Home() {
     );
   }
 
-  const activeChannel = channels.find((c) => c.id === activeChannelId);
-
   return (
-    <>
-      <div className="h-screen flex overflow-hidden">
-        <Sidebar />
-
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <div className="flex-1 flex overflow-hidden">
-            <div className="flex-1 flex flex-col overflow-hidden">
-              {activeChannel && activeProject ? (
-                <ChannelView
-                  channelId={activeChannel.id}
-                  channelName={activeChannel.name}
-                  projectId={activeProject.id}
-                />
-              ) : (
-                <div className="flex-1 flex items-center justify-center text-slack-muted">
-                  Select a channel to get started
-                </div>
-              )}
-            </div>
-
-            <TaskPanel />
-            <FilesPanel />
-          </div>
-        </div>
-      </div>
+    <div className="h-screen relative overflow-hidden">
+      <OfficeCanvas />
+      <HudOverlay />
       <AgentEditorDialog />
       <NewProjectDialog
         open={newProjectDialogOpen}
@@ -177,6 +148,6 @@ export default function Home() {
             .catch(() => setTasks([]));
         }}
       />
-    </>
+    </div>
   );
 }

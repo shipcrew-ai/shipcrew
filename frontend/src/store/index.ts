@@ -77,6 +77,14 @@ interface AppState {
   setTaskPanelTab: (tab: "kanban" | "scheduled") => void;
   theme: "light" | "dark";
   toggleTheme: () => void;
+
+  // Office 3D UI
+  selectedAgentId: string | null;
+  setSelectedAgentId: (id: string | null) => void;
+  chatPanelOpen: boolean;
+  setChatPanelOpen: (open: boolean) => void;
+  taskBoardPanelOpen: boolean;
+  setTaskBoardPanelOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -205,4 +213,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       return { theme: next };
     }),
+
+  // Office 3D UI
+  selectedAgentId: null,
+  setSelectedAgentId: (id) => set({ selectedAgentId: id }),
+  chatPanelOpen: false,
+  setChatPanelOpen: (open) => set({ chatPanelOpen: open }),
+  taskBoardPanelOpen: false,
+  setTaskBoardPanelOpen: (open) => set({ taskBoardPanelOpen: open }),
 }));

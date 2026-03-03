@@ -254,3 +254,40 @@ body {
 .animate-glow-pulse {
   animation: glowPulse 2s ease-in-out infinite;
 }
+
+/* Pixel art canvas */
+.pixel-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* HUD panels for 3D office overlay */
+.hud-panel {
+  background: var(--color-sidebar);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.hud-panel-right {
+  width: 400px;
+  max-width: 100vw;
+  height: 100%;
+  background: var(--color-sidebar);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-left: 1px solid var(--glass-border);
+}
+
+.hud-panel-left {
+  width: 420px;
+  max-width: 100vw;
+  height: 100%;
+  background: var(--color-sidebar);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-right: 1px solid var(--glass-border);
+}
