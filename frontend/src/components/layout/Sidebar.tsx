@@ -7,6 +7,7 @@ import { AgentEditorDialog } from "@/components/agents/AgentEditorDialog";
 import { NewProjectDialog } from "./NewProjectDialog";
 import type { AgentStatus, Project, Agent, Channel } from "@devteam/shared";
 import { apiFetch } from "@/lib/api";
+import { clearToken } from "@/lib/auth";
 import type { Task } from "@devteam/shared";
 
 interface ProjectFull extends Project {
@@ -240,6 +241,19 @@ export function Sidebar() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Sign out */}
+      <div className="px-3 py-2 border-t border-slack-border">
+        <button
+          onClick={() => {
+            clearToken();
+            window.location.href = "/login";
+          }}
+          className="w-full text-left px-2 py-1 rounded text-xs text-slack-muted hover:text-slack-heading hover:bg-slack-hover transition-colors"
+        >
+          Sign out
+        </button>
       </div>
 
       {/* Dialogs */}

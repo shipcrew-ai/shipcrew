@@ -1,15 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store";
-import { apiFetch, getToken, clearToken } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
+import { isAuthenticated } from "@/lib/auth";
 import { useSocketEvents } from "@/hooks/useSocket";
-import { resetSocket } from "@/lib/socket";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { TaskPanel } from "@/components/layout/TaskPanel";
 import { FilesPanel } from "@/components/files/FilesPanel";
 import { ChannelView } from "@/components/chat/ChannelView";
-import { LoginForm } from "@/components/auth/LoginForm";
 import type { Project, Channel, Agent, Task } from "@devteam/shared";
 
 interface ProjectFull extends Project {
@@ -32,29 +31,24 @@ export default function Home() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [authenticated, setAuthenticated] = useState(false);
 
-  // Check for existing token on mount
   useEffect(() => {
-    if (getToken()) {
-      setAuthenticated(true);
-    } else {
-      setLoading(false);
+    if (!isAuthenticated()) {
+      window.location.href = "/login";
     }
   }, []);
 
-  // Connect socket and register events (only when authenticated)
+  // Connect socket and register events
   useSocketEvents();
 
   useEffect(() => {
-    if (!authenticated) return;
+    if (!isAuthenticated()) return;
 
     async function init() {
       try {
         const projects = await apiFetch<ProjectFull[]>("/api/projects");
 
         if (projects.length === 0) {
-          // Create a default project
           const newProject = await apiFetch<ProjectFull>("/api/projects", {
             method: "POST",
             body: JSON.stringify({
@@ -71,42 +65,22 @@ export default function Home() {
         setAgents(project.agents);
         setChannels(project.channels);
 
-        // Set active channel to #general
         const general = project.channels.find((c) => c.name === "general");
         setActiveChannelId(general?.id ?? project.channels[0].id);
 
-        // Load tasks
         const tasks = await apiFetch<Task[]>(
           `/api/projects/${project.id}/tasks`
         );
         setTasks(tasks);
       } catch (err) {
-        const msg = (err as Error).message;
-        if (msg.includes("401")) {
-          clearToken();
-          setAuthenticated(false);
-          return;
-        }
-        setError(msg);
+        setError((err as Error).message);
       } finally {
         setLoading(false);
       }
     }
 
     init();
-  }, [authenticated]);
-
-  if (!authenticated) {
-    return (
-      <LoginForm
-        onSuccess={() => {
-          resetSocket();
-          setAuthenticated(true);
-          setLoading(true);
-        }}
-      />
-    );
-  }
+  }, []);
 
   if (loading) {
     return (
@@ -139,14 +113,11 @@ export default function Home() {
 
   return (
     <div className="h-screen flex overflow-hidden">
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
         <div className="flex-1 flex overflow-hidden">
-          {/* Channel view */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {activeChannel && activeProject ? (
               <ChannelView
@@ -161,7 +132,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Side panels */}
           <TaskPanel />
           <FilesPanel />
         </div>
