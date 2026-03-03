@@ -33,8 +33,8 @@ Each agent has its own skills, memory, and budget. They talk to each other in ch
 ## Prerequisites
 
 - **Node.js 20+**
-- **Docker** and **Docker Compose** (for PostgreSQL + Redis)
 - **Anthropic API key** ([get one here](https://console.anthropic.com/))
+- **Docker** (optional, only needed for PostgreSQL — see Advanced section)
 
 ## Quick Start
 
@@ -46,15 +46,7 @@ cd shipcrew
 npm install
 ```
 
-### 2. Start the databases
-
-```bash
-docker compose up -d
-```
-
-This starts PostgreSQL and Redis in the background.
-
-### 3. Set up environment variables
+### 2. Set up environment
 
 ```bash
 cp .env.example .env
@@ -66,22 +58,14 @@ Edit `.env` and add your Anthropic API key:
 ANTHROPIC_API_KEY=sk-ant-your-key-here
 ```
 
-Everything else has working defaults for local development.
-
-### 4. Set up the database
-
-```bash
-npm run db:push    # Create tables
-npm run db:seed    # Seed with default project, agents, and channels
-```
-
-### 5. Run the app
+### 3. Run the app
 
 ```bash
 npm run dev
 ```
 
-This starts both servers concurrently:
+On first run, this automatically creates the SQLite database and seeds it with a default project and agents.
+
 - **Frontend**: http://localhost:3000
 - **Backend**: http://localhost:8000
 
@@ -149,9 +133,8 @@ npm start                # Start backend server
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `ANTHROPIC_API_KEY` | Yes | — | Your Anthropic API key |
-| `DATABASE_URL` | No | `postgresql://devteam:devteam_secret@localhost:5432/devteam` | PostgreSQL connection string |
+| `DATABASE_URL` | No | `file:./prisma/dev.db` | Database connection (SQLite default, PostgreSQL supported) |
 | `PORT` | No | `8000` | Backend server port |
-| `REDIS_URL` | No | `redis://localhost:6379` | Redis connection string |
 | `SANDBOX_BASE_PATH` | No | `/tmp/devteam-sandboxes` | Docker sandbox volume path |
 | `SANDBOX_IMAGE` | No | `node:20-alpine` | Docker image for sandboxes |
 | `WEBHOOK_SECRET` | No | — | Bearer token for webhooks |
@@ -286,6 +269,34 @@ lsof -i :8000
 - Check your `ANTHROPIC_API_KEY` in `.env`
 - Check backend logs in the terminal running `npm run dev`
 - Verify the agent has the correct channel assignment
+
+## Advanced: PostgreSQL
+
+For production deployments or if you prefer PostgreSQL over SQLite:
+
+1. Start PostgreSQL with Docker:
+```bash
+docker compose up -d
+```
+
+2. Update your `.env`:
+```
+DATABASE_URL=postgresql://devteam:devteam_secret@localhost:5432/devteam
+```
+
+3. Update `backend/prisma/schema.prisma` — change the provider:
+```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+```
+
+4. Push schema and seed:
+```bash
+npm run db:push
+npm run db:seed
+```
 
 ## License
 
