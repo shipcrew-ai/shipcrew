@@ -1,5 +1,7 @@
 "use client";
+import { motion } from "framer-motion";
 import { useAppStore } from "@/store";
+import { cardVariants, staggerContainer, staggerItem, hoverLift } from "@/lib/motion";
 import type { Task, TaskStatus } from "@devteam/shared";
 
 const COLUMNS: {
@@ -21,7 +23,11 @@ function TaskCard({ task }: { task: Task }) {
     : null;
 
   return (
-    <div className="bg-slack-surface border border-slack-border rounded-lg p-3.5 space-y-2 hover:border-slack-muted/50 transition-colors">
+    <motion.div
+      variants={staggerItem}
+      {...hoverLift}
+      className="glass-surface rounded-xl p-3.5 space-y-2 hover:border-white/10 transition-colors cursor-default"
+    >
       <p className="text-sm text-slack-text font-medium leading-snug">
         {task.title}
       </p>
@@ -34,14 +40,14 @@ function TaskCard({ task }: { task: Task }) {
         <div className="flex items-center gap-2 pt-0.5">
           <span
             className="w-5 h-5 rounded text-xs flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: assignee.color + "33" }}
+            style={{ backgroundColor: assignee.color + "20" }}
           >
             {assignee.avatar}
           </span>
           <span className="text-xs text-slack-muted">{assignee.name}</span>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -58,24 +64,32 @@ export function KanbanBoard() {
           <div key={col.status}>
             {/* Column header */}
             <div className="flex items-center gap-2 mb-3">
-              <span className={`w-2 h-2 rounded-full ${col.dotColor}`} />
+              <span
+                className={`w-2 h-2 rounded-full ${col.dotColor}`}
+                style={{ boxShadow: "0 0 6px currentColor" }}
+              />
               <h3 className={`text-xs font-semibold uppercase tracking-wide ${col.textColor}`}>
                 {col.label}
               </h3>
-              <span className="text-[11px] bg-slack-input text-slack-muted px-1.5 py-0.5 rounded-full ml-1">
+              <span className="text-[11px] glass-surface text-slack-muted px-1.5 py-0.5 rounded-full ml-1">
                 {colTasks.length}
               </span>
             </div>
 
             {/* Cards */}
             {colTasks.length > 0 ? (
-              <div className="space-y-2">
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                className="space-y-2"
+              >
                 {colTasks.map((task) => (
                   <TaskCard key={task.id} task={task} />
                 ))}
-              </div>
+              </motion.div>
             ) : (
-              <div className="text-xs text-slack-muted text-center py-3 border border-dashed border-slack-border rounded-lg">
+              <div className="text-xs text-slack-muted text-center py-3 border border-dashed border-[var(--glass-border)] rounded-xl">
                 No tasks
               </div>
             )}

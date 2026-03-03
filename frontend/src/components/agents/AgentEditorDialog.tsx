@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/store";
 import { apiFetch } from "@/lib/api";
+import { modalOverlayVariants, modalContentVariants } from "@/lib/motion";
 import type { Agent, AgentSkill } from "@devteam/shared";
 import { ALL_SKILLS } from "@devteam/shared";
 
@@ -235,295 +237,312 @@ export function AgentEditorDialog() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-[var(--color-backdrop,rgba(0,0,0,0.6))]" onClick={handleClose} />
+    <AnimatePresence>
+      {agentEditorOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <motion.div
+            variants={modalOverlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={handleClose}
+          />
 
-      <div className="relative bg-slack-sidebar border border-slack-border rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 animate-fade-in">
-        <h2 className="text-slack-heading text-lg font-bold mb-1">
-          {isNew ? "Add New Agent" : `Edit ${editingAgent.name}`}
-        </h2>
-        <p className="text-slack-muted text-xs mb-5">
-          {isNew
-            ? "Create a custom agent with specific skills and channels."
-            : editingAgent.isCustom
-              ? "Edit this custom agent's configuration."
-              : "Edit this agent's configuration. Default agents cannot be deleted."}
-        </p>
+          <motion.div
+            variants={modalContentVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="relative glass-raised rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 mx-4"
+          >
+            <h2 className="text-slack-heading text-lg font-bold mb-1">
+              {isNew ? "Add New Agent" : `Edit ${editingAgent.name}`}
+            </h2>
+            <p className="text-slack-muted text-xs mb-5">
+              {isNew
+                ? "Create a custom agent with specific skills and channels."
+                : editingAgent.isCustom
+                  ? "Edit this custom agent's configuration."
+                  : "Edit this agent's configuration. Default agents cannot be deleted."}
+            </p>
 
-        {/* Name + Title */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div>
-            <label className="block text-xs text-slack-text font-medium mb-1">Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="Alex"
-              className="w-full bg-slack-input border border-slack-border rounded-lg px-3 py-2 text-sm text-slack-text placeholder-slack-muted outline-none focus:border-slack-active"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-slack-text font-medium mb-1">Title</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="DevOps Engineer"
-              className="w-full bg-slack-input border border-slack-border rounded-lg px-3 py-2 text-sm text-slack-text placeholder-slack-muted outline-none focus:border-slack-active"
-            />
-          </div>
-        </div>
-
-        {/* Mention Name */}
-        <div className="mb-4">
-          <label className="block text-xs text-slack-text font-medium mb-1">
-            @mention handle
-          </label>
-          <div className="flex items-center gap-1">
-            <span className="text-slack-muted text-sm">@</span>
-            <input
-              type="text"
-              value={mentionName}
-              onChange={(e) => setMentionName(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
-              placeholder="alex"
-              className="flex-1 bg-slack-input border border-slack-border rounded-lg px-3 py-2 text-sm text-slack-text placeholder-slack-muted outline-none focus:border-slack-active"
-            />
-          </div>
-        </div>
-
-        {/* Avatar + Color */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div>
-            <label className="block text-xs text-slack-text font-medium mb-1">Avatar</label>
-            <div className="flex flex-wrap gap-1.5">
-              {PRESET_AVATARS.map((emoji) => (
-                <button
-                  key={emoji}
-                  onClick={() => setAvatar(emoji)}
-                  className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-colors ${
-                    avatar === emoji
-                      ? "bg-slack-active ring-2 ring-slack-active"
-                      : "bg-slack-input hover:bg-slack-hover"
-                  }`}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs text-slack-text font-medium mb-1">Color</label>
-            <div className="flex flex-wrap gap-1.5">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setColor(c)}
-                  className={`w-8 h-8 rounded-lg transition-all ${
-                    color === c ? "ring-2 ring-slack-heading scale-110" : "hover:scale-105"
-                  }`}
-                  style={{ backgroundColor: c }}
+            {/* Name + Title */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="block text-xs text-slack-text font-medium mb-1">Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="Alex"
+                  className="w-full bg-slack-input border border-[var(--glass-border)] rounded-lg px-3 py-2 text-sm text-slack-text placeholder-slack-muted outline-none focus:border-slack-active focus:shadow-[0_0_0_2px_var(--color-active-glow)]"
                 />
-              ))}
+              </div>
+              <div>
+                <label className="block text-xs text-slack-text font-medium mb-1">Title</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="DevOps Engineer"
+                  className="w-full bg-slack-input border border-[var(--glass-border)] rounded-lg px-3 py-2 text-sm text-slack-text placeholder-slack-muted outline-none focus:border-slack-active focus:shadow-[0_0_0_2px_var(--color-active-glow)]"
+                />
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Skills */}
-        <div className="mb-4">
-          <label className="block text-xs text-slack-text font-medium mb-2">Skills</label>
-          <div className="space-y-1.5">
-            {ALL_SKILLS.map((skill) => {
-              const def = SKILL_LABELS[skill];
-              const isActive = skills.includes(skill);
-              return (
-                <button
-                  key={skill}
-                  onClick={() => toggleSkill(skill)}
-                  className={`w-full text-left px-3 py-2 rounded-lg border transition-colors flex items-center gap-3 ${
-                    isActive
-                      ? "border-slack-active bg-slack-active/10 text-slack-text"
-                      : "border-slack-border bg-slack-input text-slack-muted hover:bg-slack-hover"
-                  }`}
-                >
-                  <div
-                    className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
-                      isActive ? "bg-slack-active border-slack-active" : "border-slack-border"
-                    }`}
-                  >
-                    {isActive && (
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium">{def.label}</p>
-                    <p className="text-[10px] text-slack-muted">{def.description}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Channels */}
-        <div className="mb-4">
-          <label className="block text-xs text-slack-text font-medium mb-2">Channels</label>
-          <div className="flex flex-wrap gap-2">
-            {channels.map((ch) => {
-              const isActive = agentChannels.includes(ch.name);
-              return (
-                <button
-                  key={ch.id}
-                  onClick={() => toggleChannel(ch.name)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                    isActive
-                      ? "border-slack-active bg-slack-active/10 text-slack-text"
-                      : "border-slack-border text-slack-muted hover:bg-slack-hover"
-                  }`}
-                >
-                  #{ch.name}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* System Prompt */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-slack-text font-medium">
-              System Prompt
-            </label>
-            <div className="flex items-center gap-2">
-              {usingAutoPrompt && !systemPrompt && (
-                <span className="text-[10px] text-slack-green">Using auto-generated</span>
-              )}
-              {editingAgent && systemPrompt && (
-                <button
-                  onClick={handleResetPrompt}
-                  className="text-[10px] text-slack-active hover:underline"
-                >
-                  Reset to Default
-                </button>
-              )}
+            {/* Mention Name */}
+            <div className="mb-4">
+              <label className="block text-xs text-slack-text font-medium mb-1">
+                @mention handle
+              </label>
+              <div className="flex items-center gap-1">
+                <span className="text-slack-muted text-sm">@</span>
+                <input
+                  type="text"
+                  value={mentionName}
+                  onChange={(e) => setMentionName(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                  placeholder="alex"
+                  className="flex-1 bg-slack-input border border-[var(--glass-border)] rounded-lg px-3 py-2 text-sm text-slack-text placeholder-slack-muted outline-none focus:border-slack-active focus:shadow-[0_0_0_2px_var(--color-active-glow)]"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Show auto-generated preview when no custom prompt */}
-          {usingAutoPrompt && !systemPrompt && generatedPromptPreview ? (
-            <div className="mb-2">
+            {/* Avatar + Color */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="block text-xs text-slack-text font-medium mb-1">Avatar</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {PRESET_AVATARS.map((emoji) => (
+                    <button
+                      key={emoji}
+                      onClick={() => setAvatar(emoji)}
+                      className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-all ${
+                        avatar === emoji
+                          ? "glass-raised glow-active"
+                          : "bg-slack-input hover:bg-white/5"
+                      }`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-slack-text font-medium mb-1">Color</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {PRESET_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setColor(c)}
+                      className={`w-8 h-8 rounded-lg transition-all ${
+                        color === c ? "ring-2 ring-white/30 scale-110 shadow-[0_0_8px_currentColor]" : "hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Skills */}
+            <div className="mb-4">
+              <label className="block text-xs text-slack-text font-medium mb-2">Skills</label>
+              <div className="space-y-1.5">
+                {ALL_SKILLS.map((skill) => {
+                  const def = SKILL_LABELS[skill];
+                  const isActive = skills.includes(skill);
+                  return (
+                    <button
+                      key={skill}
+                      onClick={() => toggleSkill(skill)}
+                      className={`w-full text-left px-3 py-2 rounded-lg border transition-all flex items-center gap-3 ${
+                        isActive
+                          ? "border-slack-active/30 glass-surface text-slack-text"
+                          : "border-[var(--glass-border)] bg-slack-input text-slack-muted hover:bg-white/5"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                          isActive ? "bg-slack-active border-slack-active" : "border-slack-border"
+                        }`}
+                      >
+                        {isActive && (
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">{def.label}</p>
+                        <p className="text-[10px] text-slack-muted">{def.description}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Channels */}
+            <div className="mb-4">
+              <label className="block text-xs text-slack-text font-medium mb-2">Channels</label>
+              <div className="flex flex-wrap gap-2">
+                {channels.map((ch) => {
+                  const isActive = agentChannels.includes(ch.name);
+                  return (
+                    <button
+                      key={ch.id}
+                      onClick={() => toggleChannel(ch.name)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                        isActive
+                          ? "border-slack-active/30 glass-surface text-slack-text"
+                          : "border-[var(--glass-border)] text-slack-muted hover:bg-white/5"
+                      }`}
+                    >
+                      #{ch.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* System Prompt */}
+            <div className="mb-4">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] text-slack-muted">Current auto-generated prompt:</span>
-                <button
-                  onClick={() => {
-                    setSystemPrompt(generatedPromptPreview);
+                <label className="text-xs text-slack-text font-medium">
+                  System Prompt
+                </label>
+                <div className="flex items-center gap-2">
+                  {usingAutoPrompt && !systemPrompt && (
+                    <span className="text-[10px] text-slack-green">Using auto-generated</span>
+                  )}
+                  {editingAgent && systemPrompt && (
+                    <button
+                      onClick={handleResetPrompt}
+                      className="text-[10px] text-slack-active hover:underline"
+                    >
+                      Reset to Default
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Show auto-generated preview when no custom prompt */}
+              {usingAutoPrompt && !systemPrompt && generatedPromptPreview ? (
+                <div className="mb-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-slack-muted">Current auto-generated prompt:</span>
+                    <button
+                      onClick={() => {
+                        setSystemPrompt(generatedPromptPreview);
+                        setUsingAutoPrompt(false);
+                      }}
+                      className="text-[10px] text-slack-active hover:underline"
+                    >
+                      Edit as custom
+                    </button>
+                  </div>
+                  <div className="w-full glass-surface border border-[var(--glass-border)] rounded-lg px-3 py-2 text-[10px] text-slack-muted font-mono max-h-40 overflow-y-auto whitespace-pre-wrap">
+                    {generatedPromptPreview}
+                  </div>
+                </div>
+              ) : (
+                <textarea
+                  value={systemPrompt}
+                  onChange={(e) => {
+                    setSystemPrompt(e.target.value);
                     setUsingAutoPrompt(false);
                   }}
-                  className="text-[10px] text-slack-active hover:underline"
+                  placeholder="Leave empty for auto-generated prompt based on skills and channels..."
+                  rows={4}
+                  className="w-full bg-slack-input border border-[var(--glass-border)] rounded-lg px-3 py-2 text-xs text-slack-text placeholder-slack-muted outline-none focus:border-slack-active focus:shadow-[0_0_0_2px_var(--color-active-glow)] resize-none font-mono"
+                />
+              )}
+            </div>
+
+            {/* Advanced */}
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="text-xs text-slack-muted hover:text-slack-text mb-3 flex items-center gap-1"
+            >
+              <svg
+                className={`w-3 h-3 transition-transform ${showAdvanced ? "rotate-90" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              Advanced Settings
+            </button>
+
+            {showAdvanced && (
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div>
+                  <label className="block text-[10px] text-slack-muted mb-1">Timeout (sec)</label>
+                  <input
+                    type="number"
+                    value={Math.round(timeoutMs / 1000)}
+                    onChange={(e) => setTimeoutMs(Math.max(10, parseInt(e.target.value) || 120) * 1000)}
+                    className="w-full bg-slack-input border border-[var(--glass-border)] rounded px-2 py-1.5 text-xs text-slack-text outline-none focus:border-slack-active"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slack-muted mb-1">Max Turns</label>
+                  <input
+                    type="number"
+                    value={maxTurns}
+                    onChange={(e) => setMaxTurns(Math.max(1, parseInt(e.target.value) || 25))}
+                    className="w-full bg-slack-input border border-[var(--glass-border)] rounded px-2 py-1.5 text-xs text-slack-text outline-none focus:border-slack-active"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slack-muted mb-1">Budget ($)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={maxBudgetUsd}
+                    onChange={(e) => setMaxBudgetUsd(Math.max(0.1, parseFloat(e.target.value) || 1.0))}
+                    className="w-full bg-slack-input border border-[var(--glass-border)] rounded px-2 py-1.5 text-xs text-slack-text outline-none focus:border-slack-active"
+                  />
+                </div>
+              </div>
+            )}
+
+            {error && <p className="text-slack-red text-xs mb-3">{error}</p>}
+
+            {/* Actions */}
+            <div className="flex items-center justify-between">
+              <div>
+                {editingAgent?.isCustom && (
+                  <button
+                    onClick={handleDelete}
+                    disabled={loading}
+                    className="px-3 py-1.5 text-xs text-slack-red hover:bg-slack-red/10 rounded transition-colors"
+                  >
+                    Delete Agent
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleClose}
+                  className="px-4 py-1.5 text-sm text-slack-muted hover:text-slack-text rounded transition-colors"
                 >
-                  Edit as custom
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={!name.trim() || !title.trim() || !mentionName.trim() || skills.length === 0 || loading}
+                  className="px-4 py-1.5 text-sm text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 rounded-lg font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  {loading ? "Saving..." : isNew ? "Create Agent" : "Save Changes"}
                 </button>
               </div>
-              <div className="w-full bg-slack-input/50 border border-slack-border rounded-lg px-3 py-2 text-[10px] text-slack-muted font-mono max-h-40 overflow-y-auto whitespace-pre-wrap">
-                {generatedPromptPreview}
-              </div>
             </div>
-          ) : (
-            <textarea
-              value={systemPrompt}
-              onChange={(e) => {
-                setSystemPrompt(e.target.value);
-                setUsingAutoPrompt(false);
-              }}
-              placeholder="Leave empty for auto-generated prompt based on skills and channels..."
-              rows={4}
-              className="w-full bg-slack-input border border-slack-border rounded-lg px-3 py-2 text-xs text-slack-text placeholder-slack-muted outline-none focus:border-slack-active resize-none font-mono"
-            />
-          )}
+          </motion.div>
         </div>
-
-        {/* Advanced */}
-        <button
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-xs text-slack-muted hover:text-slack-text mb-3 flex items-center gap-1"
-        >
-          <svg
-            className={`w-3 h-3 transition-transform ${showAdvanced ? "rotate-90" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-          Advanced Settings
-        </button>
-
-        {showAdvanced && (
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div>
-              <label className="block text-[10px] text-slack-muted mb-1">Timeout (sec)</label>
-              <input
-                type="number"
-                value={Math.round(timeoutMs / 1000)}
-                onChange={(e) => setTimeoutMs(Math.max(10, parseInt(e.target.value) || 120) * 1000)}
-                className="w-full bg-slack-input border border-slack-border rounded px-2 py-1.5 text-xs text-slack-text outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-slack-muted mb-1">Max Turns</label>
-              <input
-                type="number"
-                value={maxTurns}
-                onChange={(e) => setMaxTurns(Math.max(1, parseInt(e.target.value) || 25))}
-                className="w-full bg-slack-input border border-slack-border rounded px-2 py-1.5 text-xs text-slack-text outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-slack-muted mb-1">Budget ($)</label>
-              <input
-                type="number"
-                step="0.1"
-                value={maxBudgetUsd}
-                onChange={(e) => setMaxBudgetUsd(Math.max(0.1, parseFloat(e.target.value) || 1.0))}
-                className="w-full bg-slack-input border border-slack-border rounded px-2 py-1.5 text-xs text-slack-text outline-none"
-              />
-            </div>
-          </div>
-        )}
-
-        {error && <p className="text-slack-red text-xs mb-3">{error}</p>}
-
-        {/* Actions */}
-        <div className="flex items-center justify-between">
-          <div>
-            {editingAgent?.isCustom && (
-              <button
-                onClick={handleDelete}
-                disabled={loading}
-                className="px-3 py-1.5 text-xs text-slack-red hover:bg-slack-red/10 rounded transition-colors"
-              >
-                Delete Agent
-              </button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleClose}
-              className="px-4 py-1.5 text-sm text-slack-muted hover:text-slack-text rounded transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!name.trim() || !title.trim() || !mentionName.trim() || skills.length === 0 || loading}
-              className="px-4 py-1.5 text-sm text-white bg-slack-active hover:bg-slack-active/80 rounded font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? "Saving..." : isNew ? "Create Agent" : "Save Changes"}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }

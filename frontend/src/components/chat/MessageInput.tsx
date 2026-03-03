@@ -1,8 +1,10 @@
 "use client";
 import { useState, useRef, useEffect, useCallback, useMemo, KeyboardEvent } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { getSocket } from "@/lib/socket";
 import { useAppStore } from "@/store";
 import { AgentAvatar } from "@/components/agents/AgentAvatar";
+import { dropdownVariants } from "@/lib/motion";
 
 interface Props {
   channelId: string;
@@ -163,52 +165,58 @@ export function MessageInput({ channelId, projectId, channelName }: Props) {
   return (
     <div className="px-4 pb-4 relative">
       {/* @mention autocomplete dropdown */}
-      {showMentions && filteredMentions.length > 0 && (
-        <div
-          ref={menuRef}
-          className="absolute bottom-full left-4 right-4 mb-1 bg-slack-sidebar border border-slack-border rounded-lg shadow-xl overflow-hidden z-50"
-        >
-          <div className="px-3 py-1.5 text-[10px] font-semibold text-slack-muted uppercase tracking-wider border-b border-slack-border">
-            Mention someone
-          </div>
-          {filteredMentions.map((target, i) => {
-            const agent = getAgentForMention(target);
-            return (
-              <button
-                key={target.name}
-                onMouseDown={(e) => {
-                  e.preventDefault(); // Prevent blur
-                  insertMention(target.name);
-                }}
-                onMouseEnter={() => setMentionIndex(i)}
-                className={`w-full text-left px-3 py-2 flex items-center gap-2.5 transition-colors ${
-                  i === mentionIndex
-                    ? "bg-slack-active text-slack-heading"
-                    : "text-slack-text hover:bg-slack-hover"
-                }`}
-              >
-                {target.name === "all" ? (
-                  <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
-                    @
+      <AnimatePresence>
+        {showMentions && filteredMentions.length > 0 && (
+          <motion.div
+            ref={menuRef}
+            variants={dropdownVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="absolute bottom-full left-4 right-4 mb-1 glass-raised rounded-xl overflow-hidden z-50"
+          >
+            <div className="px-3 py-1.5 text-[10px] font-semibold text-slack-muted uppercase tracking-wider border-b border-[var(--glass-border)]">
+              Mention someone
+            </div>
+            {filteredMentions.map((target, i) => {
+              const agent = getAgentForMention(target);
+              return (
+                <button
+                  key={target.name}
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // Prevent blur
+                    insertMention(target.name);
+                  }}
+                  onMouseEnter={() => setMentionIndex(i)}
+                  className={`w-full text-left px-3 py-2 flex items-center gap-2.5 transition-colors ${
+                    i === mentionIndex
+                      ? "bg-slack-active/20 text-slack-heading"
+                      : "text-slack-text hover:bg-white/5"
+                  }`}
+                >
+                  {target.name === "all" ? (
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+                      @
+                    </div>
+                  ) : agent ? (
+                    <AgentAvatar agent={agent} size="sm" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-slack-hover flex-shrink-0" />
+                  )}
+                  <div className="min-w-0">
+                    <span className="text-sm font-medium">@{target.name}</span>
+                    <span className="text-xs text-slack-muted ml-2">
+                      {target.description}
+                    </span>
                   </div>
-                ) : agent ? (
-                  <AgentAvatar agent={agent} size="sm" />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-slack-hover flex-shrink-0" />
-                )}
-                <div className="min-w-0">
-                  <span className="text-sm font-medium">@{target.name}</span>
-                  <span className="text-xs text-slack-muted ml-2">
-                    {target.description}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="flex items-end gap-2 bg-slack-input border border-slack-border rounded-lg px-3 py-2">
+      <div className="flex items-end gap-2 glass-raised rounded-xl px-4 py-3 focus-glass">
         <textarea
           ref={textareaRef}
           value={value}
@@ -222,7 +230,7 @@ export function MessageInput({ channelId, projectId, channelName }: Props) {
         <button
           onClick={send}
           disabled={!value.trim()}
-          className="flex-shrink-0 p-1.5 rounded text-slack-muted hover:text-slack-heading hover:bg-[var(--color-send-hover)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="flex-shrink-0 rounded-full w-8 h-8 flex items-center justify-center text-slack-muted hover:text-white hover:bg-slack-active hover:shadow-[0_0_12px_var(--color-active-glow)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />

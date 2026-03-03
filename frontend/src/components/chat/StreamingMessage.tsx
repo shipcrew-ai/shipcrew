@@ -1,4 +1,5 @@
 "use client";
+import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AgentAvatar } from "@/components/agents/AgentAvatar";
@@ -17,7 +18,12 @@ export function StreamingMessage({ agentId, content }: Props) {
   if (!agent) return null;
 
   return (
-    <div className="flex gap-3 px-4 py-1.5 bg-[var(--color-stream-bg)] animate-fade-in">
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="flex gap-3 px-4 py-1.5 glass-surface rounded-lg mx-2 border-l-2 border-l-[var(--color-active)]"
+    >
       <div className="flex-shrink-0 mt-0.5">
         <AgentAvatar agent={agent} size="md" showStatus={false} />
       </div>
@@ -34,13 +40,13 @@ export function StreamingMessage({ agentId, content }: Props) {
               {agent.title}
             </span>
           )}
-          <span className="text-[10px] text-slack-muted">typing...</span>
+          <span className="text-[10px] text-slack-active animate-glow-pulse">typing...</span>
         </div>
         <div className="text-sm text-slack-text prose-chat leading-relaxed">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
           <span className="cursor-blink" />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

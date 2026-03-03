@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import clsx from "clsx";
+import { motion } from "framer-motion";
 
 export interface FileNode {
   name: string;
@@ -102,19 +103,18 @@ function DirectoryNode({
     <div>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left flex items-center gap-1.5 px-2 py-0.5 rounded hover:bg-slack-hover transition-colors group"
+        className="w-full text-left flex items-center gap-1.5 px-2 py-0.5 rounded hover:bg-white/5 transition-colors group"
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
-        <svg
-          className={clsx(
-            "w-3 h-3 text-slack-muted flex-shrink-0 transition-transform",
-            expanded && "rotate-90"
-          )}
+        <motion.svg
+          animate={{ rotate: expanded ? 90 : 0 }}
+          transition={{ duration: 0.15 }}
+          className="w-3 h-3 text-slack-muted flex-shrink-0"
           fill="currentColor"
           viewBox="0 0 20 20"
         >
           <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-        </svg>
+        </motion.svg>
         <svg className="w-3.5 h-3.5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
           {expanded ? (
             <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v1H4a1 1 0 00-1 1l-1 5V6z" />
@@ -153,14 +153,17 @@ function FileLeaf({
     <button
       onClick={() => onSelect(node.path)}
       className={clsx(
-        "w-full text-left flex items-center gap-1.5 px-2 py-0.5 rounded transition-colors",
+        "w-full text-left flex items-center gap-1.5 px-2 py-0.5 rounded transition-colors relative",
         isSelected
-          ? "bg-slack-active text-white"
-          : "hover:bg-slack-hover text-slack-text"
+          ? "bg-slack-active/20 text-slack-active"
+          : "hover:bg-white/5 text-slack-text"
       )}
       style={{ paddingLeft: `${depth * 12 + 20}px` }}
       title={node.size != null ? formatSize(node.size) : undefined}
     >
+      {isSelected && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3 rounded-full bg-slack-active" />
+      )}
       <FileIcon name={node.name} />
       <span className="text-xs truncate">{node.name}</span>
     </button>

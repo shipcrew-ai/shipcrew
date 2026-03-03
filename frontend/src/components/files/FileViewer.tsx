@@ -120,8 +120,8 @@ export function FileViewer({ projectId, filePath, fileTreeVersion }: FileViewerP
         <pre className="text-xs leading-5 font-mono p-3 min-w-0">
           <code>
             {data.content?.split("\n").map((line, i) => (
-              <div key={i} className="flex hover:bg-slack-hover/50">
-                <span className="text-slack-muted select-none w-10 text-right pr-3 flex-shrink-0 inline-block">
+              <div key={i} className="flex hover:bg-white/[0.02]">
+                <span className="text-slack-muted select-none w-10 text-right pr-3 flex-shrink-0 inline-block opacity-40">
                   {i + 1}
                 </span>
                 <span className="text-slack-text whitespace-pre-wrap break-all">{line || " "}</span>
@@ -144,9 +144,9 @@ function FileHeader({
   size: number;
 }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 border-b border-slack-border bg-slack-sidebar/50 flex-shrink-0">
+    <div className="flex items-center gap-2 px-3 py-1.5 border-b border-[var(--glass-border)] glass-surface flex-shrink-0">
       <span className="text-xs font-medium text-slack-heading truncate">{fileName}</span>
-      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slack-hover text-slack-muted flex-shrink-0">
+      <span className="text-[10px] px-1.5 py-0.5 glass-surface rounded-full text-slack-muted flex-shrink-0">
         {getLanguageLabel(language)}
       </span>
       <span className="text-[10px] text-slack-muted flex-shrink-0">

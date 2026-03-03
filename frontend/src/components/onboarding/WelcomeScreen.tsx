@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { apiFetch } from "@/lib/api";
+import { heroVariants, staggerContainer, staggerItem, hoverLift } from "@/lib/motion";
 import type { Project, Channel, Agent } from "@devteam/shared";
 
 interface ProjectFull extends Project {
@@ -97,10 +99,15 @@ export function WelcomeScreen({ onProjectCreated }: WelcomeScreenProps) {
   };
 
   return (
-    <div className="h-screen overflow-y-auto bg-[var(--color-bg)]">
+    <div className="h-screen overflow-y-auto bg-mesh relative noise">
       <div className="max-w-4xl mx-auto px-6 py-16">
         {/* Section 1: Hero */}
-        <div className="text-center mb-16">
+        <motion.div
+          variants={heroVariants}
+          initial="hidden"
+          animate="visible"
+          className="text-center mb-16"
+        >
           <h1 className="text-4xl font-bold text-[var(--color-heading)] mb-3">
             Your AI development team is ready
           </h1>
@@ -109,14 +116,20 @@ export function WelcomeScreen({ onProjectCreated }: WelcomeScreenProps) {
             together to build software. Describe what you want, and they'll
             take it from there.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="flex flex-wrap justify-center gap-4 mb-20">
-          {AGENTS.map((agent, index) => (
-            <div
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-wrap justify-center gap-4 mb-20"
+        >
+          {AGENTS.map((agent) => (
+            <motion.div
               key={agent.name}
-              className="animate-fade-slide-up w-40 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-center transition-transform hover:-translate-y-0.5 hover:shadow-lg"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              variants={staggerItem}
+              {...hoverLift}
+              className="w-40 glass-raised rounded-2xl p-4 text-center transition-transform hover:shadow-lg cursor-default"
             >
               <div className="text-4xl mb-2">{agent.emoji}</div>
               <p className="font-semibold text-[var(--color-heading)]">
@@ -128,9 +141,9 @@ export function WelcomeScreen({ onProjectCreated }: WelcomeScreenProps) {
               <p className="text-xs text-[var(--color-muted)]">
                 {agent.description}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Section 2: How It Works */}
         <div className="mb-20">
@@ -141,7 +154,7 @@ export function WelcomeScreen({ onProjectCreated }: WelcomeScreenProps) {
             {STEPS.map((step, index) => (
               <div key={step.title} className="flex items-start gap-6 sm:block sm:text-center max-w-xs">
                 <div className="flex flex-col items-center gap-2 sm:mb-3">
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-active)] text-white text-sm font-bold flex-shrink-0">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-bold flex-shrink-0">
                     {index + 1}
                   </span>
                   <span className="text-3xl">{step.icon}</span>
@@ -161,7 +174,7 @@ export function WelcomeScreen({ onProjectCreated }: WelcomeScreenProps) {
 
         {/* Section 3: Create Project */}
         <div className="max-w-md mx-auto">
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+          <div className="glass-raised rounded-2xl p-6">
             <h2 className="text-xl font-bold text-[var(--color-heading)] mb-4 text-center">
               Start your first project
             </h2>
@@ -176,7 +189,7 @@ export function WelcomeScreen({ onProjectCreated }: WelcomeScreenProps) {
                   onChange={(e) => setName(e.target.value)}
                   required
                   disabled={loading}
-                  className="w-full px-3 py-2 rounded-md border border-[var(--color-border)] bg-[var(--color-input)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-active)] focus:border-transparent disabled:opacity-50"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-[var(--color-input)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[var(--color-active)] focus:shadow-[0_0_0_2px_var(--color-active-glow)] disabled:opacity-50 transition-all"
                   placeholder="e.g., My Todo App, Blog API, Landing Page"
                 />
               </div>
@@ -192,7 +205,7 @@ export function WelcomeScreen({ onProjectCreated }: WelcomeScreenProps) {
                   onChange={(e) => setDescription(e.target.value)}
                   disabled={loading}
                   rows={3}
-                  className="w-full px-3 py-2 rounded-md border border-[var(--color-border)] bg-[var(--color-input)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-active)] focus:border-transparent resize-none disabled:opacity-50"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-[var(--color-input)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[var(--color-active)] focus:shadow-[0_0_0_2px_var(--color-active-glow)] resize-none disabled:opacity-50 transition-all"
                   placeholder="What do you want to build?"
                 />
               </div>
@@ -202,7 +215,7 @@ export function WelcomeScreen({ onProjectCreated }: WelcomeScreenProps) {
               <button
                 type="submit"
                 disabled={loading || !name.trim()}
-                className="w-full py-2.5 px-4 rounded-md bg-[var(--color-active)] text-white font-medium hover:brightness-110 disabled:opacity-50 transition"
+                className="w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium hover:from-indigo-400 hover:to-purple-400 disabled:opacity-50 transition-all"
               >
                 {loading
                   ? "Creating project..."

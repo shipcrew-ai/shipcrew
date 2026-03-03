@@ -10,6 +10,8 @@ import { TaskPanel } from "@/components/layout/TaskPanel";
 import { FilesPanel } from "@/components/files/FilesPanel";
 import { ChannelView } from "@/components/chat/ChannelView";
 import { WelcomeScreen } from "@/components/onboarding/WelcomeScreen";
+import { AgentEditorDialog } from "@/components/agents/AgentEditorDialog";
+import { NewProjectDialog } from "@/components/layout/NewProjectDialog";
 import type { Project, Channel, Agent, Task } from "@devteam/shared";
 
 interface ProjectFull extends Project {
@@ -29,6 +31,9 @@ export default function Home() {
     setActiveChannelId,
     activeChannelId,
     channels,
+    clearMessages,
+    newProjectDialogOpen,
+    setNewProjectDialogOpen,
   } = useAppStore();
 
   const [loading, setLoading] = useState(true);
@@ -82,10 +87,13 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-slack-bg">
-        <div className="text-center">
+      <div className="h-screen flex items-center justify-center bg-mesh relative noise">
+        <div className="glass-raised rounded-2xl p-8 text-center">
           <div className="text-3xl mb-3">🤖</div>
-          <p className="text-slack-muted text-sm">Loading Shipmate...</p>
+          <div className="w-32 h-1 rounded-full bg-slack-input overflow-hidden mx-auto">
+            <div className="h-full w-1/2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 animate-pulse" />
+          </div>
+          <p className="text-slack-muted text-sm mt-3">Loading ShipCrew...</p>
         </div>
       </div>
     );
@@ -93,8 +101,8 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="h-screen flex items-center justify-center bg-slack-bg">
-        <div className="text-center max-w-md">
+      <div className="h-screen flex items-center justify-center bg-mesh relative noise">
+        <div className="glass-raised rounded-2xl p-8 text-center max-w-md">
           <div className="text-3xl mb-3">⚠️</div>
           <p className="text-slack-heading font-semibold mb-2">Connection Error</p>
           <p className="text-slack-muted text-sm">{error}</p>
@@ -126,30 +134,49 @@ export default function Home() {
   const activeChannel = channels.find((c) => c.id === activeChannelId);
 
   return (
-    <div className="h-screen flex overflow-hidden">
-      <Sidebar />
+    <>
+      <div className="h-screen flex overflow-hidden">
+        <Sidebar />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <div className="flex-1 flex overflow-hidden">
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {activeChannel && activeProject ? (
-              <ChannelView
-                channelId={activeChannel.id}
-                channelName={activeChannel.name}
-                projectId={activeProject.id}
-              />
-            ) : (
-              <div className="flex-1 flex items-center justify-center text-slack-muted">
-                Select a channel to get started
-              </div>
-            )}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {activeChannel && activeProject ? (
+                <ChannelView
+                  channelId={activeChannel.id}
+                  channelName={activeChannel.name}
+                  projectId={activeProject.id}
+                />
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-slack-muted">
+                  Select a channel to get started
+                </div>
+              )}
+            </div>
+
+            <TaskPanel />
+            <FilesPanel />
           </div>
-
-          <TaskPanel />
-          <FilesPanel />
         </div>
       </div>
-    </div>
+      <AgentEditorDialog />
+      <NewProjectDialog
+        open={newProjectDialogOpen}
+        onClose={() => setNewProjectDialogOpen(false)}
+        onCreated={(project) => {
+          setProjects([...projects, project]);
+          clearMessages();
+          setActiveProject(project);
+          setAgents(project.agents);
+          setChannels(project.channels);
+          const general = project.channels.find((c) => c.name === "general");
+          setActiveChannelId(general?.id ?? project.channels[0]?.id);
+          apiFetch<Task[]>(`/api/projects/${project.id}/tasks`)
+            .then(setTasks)
+            .catch(() => setTasks([]));
+        }}
+      />
+    </>
   );
 }

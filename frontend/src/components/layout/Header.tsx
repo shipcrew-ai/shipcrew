@@ -1,4 +1,5 @@
 "use client";
+import { motion } from "framer-motion";
 import { useAppStore } from "@/store";
 import { AgentAvatar } from "@/components/agents/AgentAvatar";
 import { apiFetch } from "@/lib/api";
@@ -47,7 +48,7 @@ export function Header() {
   const mode = activeProject?.interactionMode ?? "newbie";
 
   return (
-    <div className="h-12 border-b border-slack-border px-4 flex items-center justify-between bg-slack-bg">
+    <div className="h-12 border-b border-[var(--glass-border)] px-4 flex items-center justify-between bg-transparent backdrop-blur-md">
       {/* Left: channel name */}
       <div className="flex items-center gap-2">
         <span className="text-slack-muted font-medium">#</span>
@@ -65,9 +66,10 @@ export function Header() {
       {/* Right: theme + mode toggle + active agents + task panel */}
       <div className="flex items-center gap-3">
         {/* Theme toggle */}
-        <button
+        <motion.button
           onClick={toggleTheme}
-          className="text-slack-muted hover:text-slack-heading p-1.5 rounded hover:bg-slack-hover transition-colors"
+          whileTap={{ scale: 0.9, rotate: 15 }}
+          className="text-slack-muted hover:text-slack-heading p-1.5 rounded hover:bg-white/5 transition-colors"
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
         >
           {theme === "dark" ? (
@@ -79,12 +81,12 @@ export function Header() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           )}
-        </button>
+        </motion.button>
 
         {/* Interaction mode toggle */}
         <button
           onClick={toggleMode}
-          className="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors border border-slack-border hover:bg-slack-hover"
+          className="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors border border-[var(--glass-border)] hover:bg-white/5"
           title={
             mode === "newbie"
               ? "Newbie mode: PM asks clarifying questions before building"
@@ -98,6 +100,9 @@ export function Header() {
             className={`w-7 h-4 rounded-full relative transition-colors ${
               mode === "newbie" ? "bg-green-600" : "bg-blue-600"
             }`}
+            style={{
+              boxShadow: `0 0 8px ${mode === "newbie" ? "rgba(34,197,94,0.3)" : "var(--color-active-glow)"}`,
+            }}
           >
             <div
               className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${
@@ -121,7 +126,7 @@ export function Header() {
         )}
         <button
           onClick={() => setFilesPanelOpen(!filesPanelOpen)}
-          className={`p-1.5 rounded hover:bg-slack-hover transition-colors ${filesPanelOpen ? "text-slack-heading bg-slack-hover" : "text-slack-muted hover:text-slack-heading"}`}
+          className={`p-1.5 rounded hover:bg-white/5 transition-colors ${filesPanelOpen ? "text-slack-heading bg-white/5" : "text-slack-muted hover:text-slack-heading"}`}
           title="Toggle project files"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +135,7 @@ export function Header() {
         </button>
         <button
           onClick={() => setTaskPanelOpen(!taskPanelOpen)}
-          className={`p-1.5 rounded hover:bg-slack-hover transition-colors ${taskPanelOpen ? "text-slack-heading bg-slack-hover" : "text-slack-muted hover:text-slack-heading"}`}
+          className={`p-1.5 rounded hover:bg-white/5 transition-colors ${taskPanelOpen ? "text-slack-heading bg-white/5" : "text-slack-muted hover:text-slack-heading"}`}
           title="Toggle task board"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -53,6 +53,10 @@ interface AppState {
   setAgentEditorOpen: (open: boolean) => void;
   setEditingAgent: (agent: Agent | null) => void;
 
+  // New Project Dialog
+  newProjectDialogOpen: boolean;
+  setNewProjectDialogOpen: (open: boolean) => void;
+
   // Tasks
   tasks: Task[];
   setTasks: (tasks: Task[]) => void;
@@ -160,6 +164,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   editingAgent: null,
   setAgentEditorOpen: (open) => set({ agentEditorOpen: open }),
   setEditingAgent: (agent) => set({ editingAgent: agent }),
+
+  // New Project Dialog
+  newProjectDialogOpen: false,
+  setNewProjectDialogOpen: (open) => set({ newProjectDialogOpen: open }),
 
   // Tasks
   tasks: [],

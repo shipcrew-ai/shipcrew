@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
 import clsx from "clsx";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/store";
 import { AgentAvatar } from "@/components/agents/AgentAvatar";
-import { AgentEditorDialog } from "@/components/agents/AgentEditorDialog";
-import { NewProjectDialog } from "./NewProjectDialog";
-import type { AgentStatus, Project, Agent, Channel } from "@devteam/shared";
+import { sidebarVariants, dropdownVariants } from "@/lib/motion";
+import type { Project, Agent, Channel } from "@devteam/shared";
 import { apiFetch } from "@/lib/api";
 import { clearToken } from "@/lib/auth";
 import type { Task } from "@devteam/shared";
@@ -35,9 +35,9 @@ export function Sidebar() {
     filesPanelOpen,
     setAgentEditorOpen,
     setEditingAgent,
+    setNewProjectDialogOpen,
   } = useAppStore();
 
-  const [showNewProject, setShowNewProject] = useState(false);
   const [showProjectMenu, setShowProjectMenu] = useState(false);
 
   const switchProject = async (project: ProjectFull) => {
@@ -58,23 +58,23 @@ export function Sidebar() {
     }
   };
 
-  const handleProjectCreated = async (project: ProjectFull) => {
-    setProjects([...projects, project]);
-    await switchProject(project);
-  };
-
   return (
-    <div className="w-60 bg-slack-sidebar flex flex-col h-full border-r border-slack-border">
+    <motion.div
+      variants={sidebarVariants}
+      initial="hidden"
+      animate="visible"
+      className="w-60 glass-surface rounded-r-2xl flex flex-col h-full"
+    >
       {/* Header / Project Selector */}
       <div className="relative">
         <button
           onClick={() => setShowProjectMenu(!showProjectMenu)}
-          className="w-full px-4 py-3 border-b border-slack-border text-left hover:bg-slack-hover transition-colors"
+          className="w-full px-4 py-3 border-b border-[var(--glass-border)] text-left hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center justify-between">
             <div className="min-w-0">
               <h1 className="text-slack-heading font-bold text-base truncate">
-                {activeProject?.name ?? "Shipmate"}
+                {activeProject?.name ?? "ShipCrew"}
               </h1>
               <p className="text-slack-muted text-xs mt-0.5 truncate">
                 {activeProject?.description ?? "Select a project"}
@@ -95,50 +95,58 @@ export function Sidebar() {
         </button>
 
         {/* Dropdown */}
-        {showProjectMenu && (
-          <div className="absolute top-full left-0 right-0 z-40 bg-slack-sidebar border border-slack-border rounded-b-lg shadow-xl max-h-64 overflow-y-auto">
-            {projects.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => {
-                  const full = p as ProjectFull;
-                  if (full.agents && full.channels) {
-                    switchProject(full);
-                  } else {
-                    apiFetch<ProjectFull>(`/api/projects/${p.id}`)
-                      .then(switchProject)
-                      .catch(console.error);
-                  }
-                }}
-                className={clsx(
-                  "w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2",
-                  activeProject?.id === p.id
-                    ? "bg-slack-active text-slack-heading"
-                    : "text-slack-text hover:bg-slack-hover"
-                )}
-              >
-                <span className="text-base">📁</span>
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{p.name}</p>
-                  {p.description && (
-                    <p className="text-[10px] text-slack-muted truncate">{p.description}</p>
-                  )}
-                </div>
-              </button>
-            ))}
-
-            <button
-              onClick={() => {
-                setShowProjectMenu(false);
-                setShowNewProject(true);
-              }}
-              className="w-full text-left px-4 py-2.5 text-sm text-slack-muted hover:bg-slack-hover hover:text-slack-heading transition-colors flex items-center gap-2 border-t border-slack-border"
+        <AnimatePresence>
+          {showProjectMenu && (
+            <motion.div
+              variants={dropdownVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="absolute top-full left-2 right-2 z-40 glass-raised rounded-xl mt-1 max-h-64 overflow-y-auto"
             >
-              <span className="text-base">+</span>
-              <span>New Project</span>
-            </button>
-          </div>
-        )}
+              {projects.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => {
+                    const full = p as ProjectFull;
+                    if (full.agents && full.channels) {
+                      switchProject(full);
+                    } else {
+                      apiFetch<ProjectFull>(`/api/projects/${p.id}`)
+                        .then(switchProject)
+                        .catch(console.error);
+                    }
+                  }}
+                  className={clsx(
+                    "w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2",
+                    activeProject?.id === p.id
+                      ? "bg-slack-active/20 text-slack-heading"
+                      : "text-slack-text hover:bg-white/5"
+                  )}
+                >
+                  <span className="text-base">📁</span>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{p.name}</p>
+                    {p.description && (
+                      <p className="text-[10px] text-slack-muted truncate">{p.description}</p>
+                    )}
+                  </div>
+                </button>
+              ))}
+
+              <button
+                onClick={() => {
+                  setShowProjectMenu(false);
+                  setNewProjectDialogOpen(true);
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm text-slack-muted hover:bg-white/5 hover:text-slack-heading transition-colors flex items-center gap-2 border-t border-[var(--glass-border)]"
+              >
+                <span className="text-base">+</span>
+                <span>New Project</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Channels */}
@@ -152,12 +160,15 @@ export function Sidebar() {
               key={ch.id}
               onClick={() => setActiveChannelId(ch.id)}
               className={clsx(
-                "w-full text-left px-2 py-1 rounded text-sm flex items-center gap-1.5 transition-colors",
+                "w-full text-left px-2 py-1 rounded-lg text-sm flex items-center gap-1.5 transition-colors relative",
                 activeChannelId === ch.id
-                  ? "bg-slack-active text-white"
-                  : "text-slack-text hover:bg-slack-hover"
+                  ? "bg-slack-active/20 text-slack-active"
+                  : "text-slack-text hover:bg-white/5"
               )}
             >
+              {activeChannelId === ch.id && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-slack-active" />
+              )}
               <span className="text-slack-muted">#</span>
               {ch.name}
             </button>
@@ -169,24 +180,30 @@ export function Sidebar() {
           <button
             onClick={() => setTaskPanelOpen(!taskPanelOpen)}
             className={clsx(
-              "w-full text-left px-2 py-1 rounded text-sm flex items-center gap-2 transition-colors",
+              "w-full text-left px-2 py-1 rounded-lg text-sm flex items-center gap-2 transition-colors relative",
               taskPanelOpen
-                ? "bg-slack-active text-white"
-                : "text-slack-text hover:bg-slack-hover"
+                ? "bg-slack-active/20 text-slack-active"
+                : "text-slack-text hover:bg-white/5"
             )}
           >
+            {taskPanelOpen && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-slack-active" />
+            )}
             <span>📋</span>
             Task Board
           </button>
           <button
             onClick={() => setFilesPanelOpen(!filesPanelOpen)}
             className={clsx(
-              "w-full text-left px-2 py-1 rounded text-sm flex items-center gap-2 transition-colors",
+              "w-full text-left px-2 py-1 rounded-lg text-sm flex items-center gap-2 transition-colors relative",
               filesPanelOpen
-                ? "bg-slack-active text-white"
-                : "text-slack-text hover:bg-slack-hover"
+                ? "bg-slack-active/20 text-slack-active"
+                : "text-slack-text hover:bg-white/5"
             )}
           >
+            {filesPanelOpen && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-slack-active" />
+            )}
             <span>📂</span>
             Project Files
           </button>
@@ -203,7 +220,7 @@ export function Sidebar() {
                 setEditingAgent(null);
                 setAgentEditorOpen(true);
               }}
-              className="w-5 h-5 rounded flex items-center justify-center text-slack-muted hover:text-slack-heading hover:bg-slack-hover transition-colors text-sm"
+              className="w-5 h-5 rounded flex items-center justify-center text-slack-muted hover:text-slack-heading hover:bg-white/5 transition-colors text-sm"
               title="Add agent"
             >
               +
@@ -211,20 +228,21 @@ export function Sidebar() {
           </div>
           <div className="space-y-1">
             {agents.map((agent) => (
-              <button
+              <motion.button
                 key={agent.id}
+                whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                 onClick={() => {
                   setEditingAgent(agent);
                   setAgentEditorOpen(true);
                 }}
-                className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slack-hover transition-colors text-left"
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
               >
                 <AgentAvatar agent={agent} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm text-slack-text truncate">{agent.name}</p>
                     {agent.isCustom && (
-                      <span className="text-[8px] px-1 py-0.5 rounded bg-slack-active/20 text-slack-active font-medium flex-shrink-0">
+                      <span className="text-[8px] px-1 py-0.5 rounded glass-surface text-slack-active font-medium flex-shrink-0">
                         custom
                       </span>
                     )}
@@ -237,32 +255,25 @@ export function Sidebar() {
                     <p className="text-[10px] text-slack-muted">{agent.title}</p>
                   )}
                 </div>
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
       </div>
 
       {/* Sign out */}
-      <div className="px-3 py-2 border-t border-slack-border">
+      <div className="px-3 py-2 border-t border-slack-border-subtle">
         <button
           onClick={() => {
             clearToken();
             window.location.href = "/login";
           }}
-          className="w-full text-left px-2 py-1 rounded text-xs text-slack-muted hover:text-slack-heading hover:bg-slack-hover transition-colors"
+          className="w-full text-left px-2 py-1 rounded text-xs text-slack-muted hover:text-slack-heading hover:bg-white/5 transition-colors"
         >
           Sign out
         </button>
       </div>
 
-      {/* Dialogs */}
-      <NewProjectDialog
-        open={showNewProject}
-        onClose={() => setShowNewProject(false)}
-        onCreated={handleProjectCreated}
-      />
-      <AgentEditorDialog />
-    </div>
+    </motion.div>
   );
 }

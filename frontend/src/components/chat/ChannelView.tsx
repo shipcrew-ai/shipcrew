@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/store";
 import { apiFetch } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
@@ -53,14 +54,18 @@ export function ChannelView({ channelId, channelName, projectId }: Props) {
       <div ref={scrollRef} className="flex-1 overflow-y-auto py-4 space-y-0.5">
         {messages.length === 0 && (
           <div className="text-center text-slack-muted text-sm py-12">
-            <div className="text-4xl mb-3">💬</div>
-            <p>This is the beginning of <strong className="text-slack-text">#{channelName}</strong></p>
-            <p className="mt-1 text-xs">Type a message to get started</p>
+            <div className="glass-raised rounded-2xl p-8 inline-block">
+              <div className="text-4xl mb-3">💬</div>
+              <p>This is the beginning of <strong className="text-slack-text">#{channelName}</strong></p>
+              <p className="mt-1 text-xs">Type a message to get started</p>
+            </div>
           </div>
         )}
-        {messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} />
-        ))}
+        <AnimatePresence initial={false}>
+          {messages.map((msg) => (
+            <MessageBubble key={msg.id} message={msg} />
+          ))}
+        </AnimatePresence>
         {activeStreams.map((stream) => (
           <StreamingMessage
             key={stream.id}
