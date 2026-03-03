@@ -97,7 +97,7 @@ export function WelcomeScreen({ onProjectCreated }: WelcomeScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] overflow-y-auto">
+    <div className="h-screen overflow-y-auto bg-[var(--color-bg)]">
       <div className="max-w-4xl mx-auto px-6 py-16">
         {/* Section 1: Hero */}
         <div className="text-center mb-16">
