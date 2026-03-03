@@ -21,6 +21,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (isAuthenticated()) router.replace("/");
+    document.title = "Create Account \u2014 ShipCrew";
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,7 +56,7 @@ export default function RegisterPage() {
 
   return (
     <div className="h-screen flex items-center justify-center bg-slack-bg">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-8">
           <div className="text-4xl mb-2">🚀</div>
           <h1 className="text-2xl font-bold text-slack-heading">ShipCrew</h1>
@@ -72,7 +73,8 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent"
+              disabled={loading}
+              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent disabled:opacity-50"
               placeholder="Your name"
             />
           </div>
@@ -86,7 +88,8 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent"
+              disabled={loading}
+              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent disabled:opacity-50"
               placeholder="you@example.com"
             />
           </div>
@@ -101,7 +104,8 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent"
+              disabled={loading}
+              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent disabled:opacity-50"
               placeholder="Min 6 characters"
             />
           </div>
@@ -116,7 +120,8 @@ export default function RegisterPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent"
+              disabled={loading}
+              className="w-full px-3 py-2 rounded-md border border-slack-border bg-slack-input text-slack-text placeholder-slack-muted focus:outline-none focus:ring-2 focus:ring-slack-active focus:border-transparent disabled:opacity-50"
               placeholder="Repeat password"
             />
           </div>
@@ -128,7 +133,7 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full py-2 px-4 rounded-md bg-slack-active text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
-            {loading ? "..." : "Create Account"}
+            {loading ? "Creating account..." : "Create Account"}
           </button>
         </form>
 

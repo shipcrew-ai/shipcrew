@@ -3,7 +3,7 @@ import "./globals.css";
 import { ThemeSync } from "@/components/ThemeSync";
 
 export const metadata: Metadata = {
-  title: "Shipmate",
+  title: "ShipCrew",
   description: "Your AI crew that builds software",
 };
 
