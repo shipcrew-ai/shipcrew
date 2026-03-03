@@ -1,11 +1,11 @@
 ---
 name: add-auth
-status: backlog
+status: completed
 created: 2026-03-03T05:22:28Z
-progress: 0%
+progress: 100%
 prd: .claude/prds/add-auth.md
 github: https://github.com/shipcrew-ai/shipcrew/issues/13
-updated: 2026-03-03T05:28:00Z
+updated: 2026-03-03T05:45:30Z
 ---
 
 # Epic: Add JWT Authentication to Backend
@@ -76,11 +76,11 @@ No frontend changes in this epic. The frontend will start getting 401s after thi
 - Critical path: #14 → #16 → #17 → #18
 
 ## Tasks Created
-- [ ] #14 - Add User model to Prisma schema and link to Project (parallel: true)
-- [ ] #15 - Create password hashing and JWT utilities (parallel: true)
-- [ ] #16 - Create auth middleware and auth API endpoints (parallel: false, depends: #14, #15)
-- [ ] #17 - Wire auth into server.ts and add Socket.io auth (parallel: false, depends: #16)
-- [ ] #18 - Scope projects to user, update seed, update .env.example (parallel: false, depends: #17)
+- [x] #14 - Add User model to Prisma schema and link to Project (parallel: true)
+- [x] #15 - Create password hashing and JWT utilities (parallel: true)
+- [x] #16 - Create auth middleware and auth API endpoints (parallel: false, depends: #14, #15)
+- [x] #17 - Wire auth into server.ts and add Socket.io auth (parallel: false, depends: #16)
+- [x] #18 - Scope projects to user, update seed, update .env.example (parallel: false, depends: #17)
 
 Total tasks: 5
 Parallel tasks: 2 (#14, #15 can run simultaneously)
