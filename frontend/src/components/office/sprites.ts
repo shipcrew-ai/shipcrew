@@ -93,6 +93,35 @@ const NIGHTSTAND_POS = { x: 20 * T, y: 17 * T };
 const BOOKSHELF_POS = { x: 13 * T, y: 1 * T + 4 };
 const WINDOW_POS = { x: 5 * T, y: 1 * T + 4 };
 const CLOCK_POS = { x: 10 * T, y: 1 * T + 6 };
+const OFFICE_BULLETIN_POS = { x: 1 * T + 6, y: 1 * T + 6 };
+const OFFICE_CABINET_POS = { x: 13 * T, y: 6 * T + 8 };
+const OFFICE_SHELF_POS = { x: 10 * T + 6, y: 8 * T + 6 };
+const MEETING_PROJECTOR_POS = { x: 23 * T + 6, y: 1 * T + 4 };
+const MEETING_RACK_POS = { x: 17 * T + 4, y: 7 * T };
+const MEETING_CREDENZA_POS = { x: 27 * T, y: 7 * T + 8 };
+const MEETING_POSTER_POS = { x: 27 * T + 2, y: 4 * T + 2 };
+const KITCHEN_CABINETS_POS = [
+  { x: 4 * T, y: 14 * T + 4 },
+  { x: 6 * T + 8, y: 14 * T + 4 },
+  { x: 10 * T, y: 14 * T + 4 },
+];
+const KITCHEN_PANTRY_POS = { x: 13 * T, y: 16 * T };
+const KITCHEN_POTS_POS = { x: 7 * T + 2, y: 14 * T + 2 };
+const BEDROOM_WARDROBE_POS = { x: 29 * T, y: 15 * T };
+const BEDROOM_POSTER_POS = { x: 25 * T + 2, y: 15 * T + 2 };
+const BEDROOM_MIRROR_POS = { x: 21 * T + 2, y: 14 * T + 6 };
+const HALLWAY_SCONCES = [
+  { x: 4 * T, y: 10 * T + 2 },
+  { x: 12 * T, y: 10 * T + 2 },
+  { x: 19 * T, y: 10 * T + 2 },
+  { x: 27 * T, y: 10 * T + 2 },
+];
+const HALLWAY_RUNNERS = [
+  { x: 3 * T, y: 11 * T + 10, w: 5 * T },
+  { x: 12 * T, y: 11 * T + 10, w: 4 * T },
+  { x: 20 * T, y: 11 * T + 10, w: 4 * T },
+  { x: 27 * T, y: 11 * T + 10, w: 2 * T },
+];
 
 // Sprite decoration positions
 export const CAT_POS = { x: 12 * T, y: 8 * T };
@@ -183,6 +212,15 @@ export function getCollisionMap(): number[][] {
   markRect(TV_POS.x, TV_POS.y, 1, 1);
   // Nightstand (1×1)
   markRect(NIGHTSTAND_POS.x, NIGHTSTAND_POS.y, 1, 1);
+  // Office cabinet (1×2)
+  markRect(OFFICE_CABINET_POS.x, OFFICE_CABINET_POS.y, 1, 2);
+  // Meeting side furniture
+  markRect(MEETING_RACK_POS.x, MEETING_RACK_POS.y, 1, 2);
+  markRect(MEETING_CREDENZA_POS.x, MEETING_CREDENZA_POS.y, 2, 1);
+  // Kitchen pantry
+  markRect(KITCHEN_PANTRY_POS.x, KITCHEN_PANTRY_POS.y, 1, 2);
+  // Bedroom wardrobe
+  markRect(BEDROOM_WARDROBE_POS.x, BEDROOM_WARDROBE_POS.y, 1, 2);
 
   _collisionMap = map;
   return map;
@@ -579,6 +617,183 @@ export function drawClock(ctx: CanvasRenderingContext2D, x: number, y: number) {
   ctx.fillRect(x + 5, y + 5, 2, 2);
 }
 
+export function drawBulletinBoard(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#7b6040";
+  ctx.fillRect(x, y, 24, 18);
+  ctx.fillStyle = "#5b452f";
+  ctx.fillRect(x + 1, y + 1, 22, 16);
+  const notes = ["#fbbf24", "#60a5fa", "#fb7185", "#34d399"];
+  for (let i = 0; i < notes.length; i++) {
+    const nx = x + 3 + (i % 2) * 9;
+    const ny = y + 3 + Math.floor(i / 2) * 6;
+    ctx.fillStyle = notes[i];
+    ctx.fillRect(nx, ny, 6, 4);
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(nx + 1, ny + 1, 1, 1);
+  }
+}
+
+export function drawShelf(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#7b6040";
+  ctx.fillRect(x, y, 24, 3);
+  ctx.fillStyle = "#5a4020";
+  ctx.fillRect(x + 2, y + 3, 2, 4);
+  ctx.fillRect(x + 20, y + 3, 2, 4);
+  ctx.fillStyle = "#eab308";
+  ctx.fillRect(x + 3, y - 6, 4, 6);
+  ctx.fillStyle = "#60a5fa";
+  ctx.fillRect(x + 9, y - 5, 3, 5);
+  ctx.fillStyle = "#22c55e";
+  ctx.fillRect(x + 14, y - 7, 5, 7);
+  ctx.fillStyle = "#ddd";
+  ctx.fillRect(x + 19, y - 4, 3, 4);
+}
+
+export function drawFileCabinet(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#7a7f8d";
+  ctx.fillRect(x, y, 14, 22);
+  ctx.fillStyle = "#666b79";
+  ctx.fillRect(x + 1, y + 1, 12, 9);
+  ctx.fillRect(x + 1, y + 12, 12, 9);
+  ctx.fillStyle = "#d1d5db";
+  ctx.fillRect(x + 4, y + 7, 6, 1);
+  ctx.fillRect(x + 4, y + 18, 6, 1);
+  ctx.fillStyle = "#f59e0b";
+  ctx.fillRect(x + 9, y + 2, 2, 2);
+}
+
+export function drawProjector(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#d6d6db";
+  ctx.fillRect(x + 4, y, 2, 7);
+  ctx.fillStyle = "#9398a3";
+  ctx.fillRect(x, y + 7, 10, 6);
+  ctx.fillStyle = "#cfd4dd";
+  ctx.fillRect(x + 1, y + 8, 8, 4);
+  ctx.fillStyle = "#0f172a";
+  ctx.fillRect(x + 6, y + 8, 2, 2);
+}
+
+export function drawServerRack(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#232936";
+  ctx.fillRect(x, y, 14, 24);
+  ctx.fillStyle = "#111827";
+  ctx.fillRect(x + 1, y + 1, 12, 22);
+  for (let i = 0; i < 4; i++) {
+    const ry = y + 3 + i * 5;
+    ctx.fillStyle = "#374151";
+    ctx.fillRect(x + 2, ry, 10, 3);
+    ctx.fillStyle = i % 2 === 0 ? "#22c55e" : "#60a5fa";
+    ctx.fillRect(x + 9, ry + 1, 2, 1);
+    ctx.fillStyle = "#ef4444";
+    ctx.fillRect(x + 3, ry + 1, 1, 1);
+  }
+}
+
+export function drawCredenza(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#75583b";
+  ctx.fillRect(x, y, 32, 16);
+  ctx.fillStyle = "#5b422a";
+  ctx.fillRect(x, y + 14, 32, 2);
+  ctx.fillStyle = "#8f6b48";
+  ctx.fillRect(x + 2, y + 2, 13, 10);
+  ctx.fillRect(x + 17, y + 2, 13, 10);
+  ctx.fillStyle = "#e5e7eb";
+  ctx.fillRect(x + 14, y + 6, 2, 2);
+  ctx.fillRect(x + 16, y + 6, 2, 2);
+  ctx.fillStyle = "#f59e0b";
+  ctx.fillRect(x + 5, y - 3, 4, 3);
+  ctx.fillStyle = "#60a5fa";
+  ctx.fillRect(x + 22, y - 4, 5, 4);
+}
+
+export function drawPoster(ctx: CanvasRenderingContext2D, x: number, y: number, palette: string[]) {
+  ctx.fillStyle = "#f3f4f6";
+  ctx.fillRect(x, y, 18, 22);
+  ctx.fillStyle = "#9ca3af";
+  ctx.fillRect(x - 1, y - 1, 20, 1);
+  ctx.fillRect(x - 1, y + 22, 20, 1);
+  ctx.fillRect(x - 1, y, 1, 22);
+  ctx.fillRect(x + 18, y, 1, 22);
+  for (let i = 0; i < palette.length; i++) {
+    ctx.fillStyle = palette[i];
+    ctx.fillRect(x + 3 + (i % 2) * 6, y + 4 + Math.floor(i / 2) * 5, 4, 4);
+  }
+}
+
+export function drawWallCabinets(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#7a6140";
+  ctx.fillRect(x, y, 20, 12);
+  ctx.fillStyle = "#5b432c";
+  ctx.fillRect(x + 1, y + 1, 8, 10);
+  ctx.fillRect(x + 11, y + 1, 8, 10);
+  ctx.fillStyle = "#d1d5db";
+  ctx.fillRect(x + 8, y + 5, 1, 2);
+  ctx.fillRect(x + 11, y + 5, 1, 2);
+}
+
+export function drawHangingPots(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#d1d5db";
+  ctx.fillRect(x, y, 18, 1);
+  for (let i = 0; i < 3; i++) {
+    const px = x + 2 + i * 6;
+    ctx.fillStyle = "#d1d5db";
+    ctx.fillRect(px, y + 1, 1, 4);
+    ctx.fillStyle = i === 1 ? "#94a3b8" : "#c08457";
+    ctx.fillRect(px - 1, y + 5, 3, 4);
+  }
+}
+
+export function drawPantry(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#886849";
+  ctx.fillRect(x, y, 14, 24);
+  ctx.fillStyle = "#5d452f";
+  ctx.fillRect(x + 1, y + 1, 12, 22);
+  ctx.fillStyle = "#9f7a53";
+  ctx.fillRect(x + 2, y + 3, 10, 4);
+  ctx.fillRect(x + 2, y + 10, 10, 4);
+  ctx.fillRect(x + 2, y + 17, 10, 4);
+  ctx.fillStyle = "#e5e7eb";
+  ctx.fillRect(x + 10, y + 11, 1, 2);
+}
+
+export function drawWardrobe(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#6b4d35";
+  ctx.fillRect(x, y, 14, 24);
+  ctx.fillStyle = "#503723";
+  ctx.fillRect(x + 1, y + 1, 5, 22);
+  ctx.fillRect(x + 8, y + 1, 5, 22);
+  ctx.fillStyle = "#d1d5db";
+  ctx.fillRect(x + 5, y + 10, 1, 2);
+  ctx.fillRect(x + 8, y + 10, 1, 2);
+}
+
+export function drawMirror(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#d6c4a8";
+  ctx.fillRect(x, y, 12, 20);
+  ctx.fillStyle = "#93c5fd";
+  ctx.fillRect(x + 1, y + 1, 10, 18);
+  ctx.fillStyle = "rgba(255,255,255,0.3)";
+  ctx.fillRect(x + 3, y + 2, 2, 14);
+}
+
+export function drawWallSconce(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.fillStyle = "#d4a850";
+  ctx.fillRect(x + 2, y, 4, 4);
+  ctx.fillStyle = "#f8d27a";
+  ctx.fillRect(x + 1, y + 1, 6, 3);
+  ctx.fillStyle = withAlpha("#facc15", 0.12);
+  ctx.fillRect(x - 4, y - 2, 14, 10);
+}
+
+export function drawHallwayRunner(ctx: CanvasRenderingContext2D, x: number, y: number, w: number) {
+  ctx.fillStyle = "rgba(87, 70, 45, 0.55)";
+  ctx.fillRect(x, y, w, 4);
+  ctx.fillStyle = "rgba(255,255,255,0.12)";
+  ctx.fillRect(x + 2, y + 1, Math.max(2, w - 4), 1);
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  ctx.fillRect(x + 1, y + 3, Math.max(2, w - 2), 1);
+}
+
 // ── Rug ──
 
 export function drawRug(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string) {
@@ -940,24 +1155,52 @@ export function drawNeedsBar(ctx: CanvasRenderingContext2D, x: number, y: number
 
 export function drawAllStaticDecor(ctx: CanvasRenderingContext2D, frame: number) {
   // Office wall decorations
+  drawBulletinBoard(ctx, OFFICE_BULLETIN_POS.x, OFFICE_BULLETIN_POS.y);
   drawBookshelf(ctx, BOOKSHELF_POS.x, BOOKSHELF_POS.y);
   drawWindow(ctx, WINDOW_POS.x, WINDOW_POS.y);
   drawClock(ctx, CLOCK_POS.x, CLOCK_POS.y);
+  drawShelf(ctx, OFFICE_SHELF_POS.x, OFFICE_SHELF_POS.y);
   drawCoffeeMachine(ctx, COFFEE_POS.x, COFFEE_POS.y);
 
   // Meeting room
   drawWhiteboard(ctx, WHITEBOARD_POS.x, WHITEBOARD_POS.y);
+  drawProjector(ctx, MEETING_PROJECTOR_POS.x, MEETING_PROJECTOR_POS.y);
+  drawPoster(ctx, MEETING_POSTER_POS.x, MEETING_POSTER_POS.y, [
+    "#fb923c",
+    "#22c55e",
+    "#60a5fa",
+    "#facc15",
+  ]);
 
   // Rugs
   drawRug(ctx, OFFICE_RUG.x, OFFICE_RUG.y, OFFICE_RUG.w, OFFICE_RUG.h, "#5A4535");
   drawRug(ctx, KITCHEN_RUG.x, KITCHEN_RUG.y, KITCHEN_RUG.w, KITCHEN_RUG.h, "#9A8A6A");
   drawRug(ctx, BEDROOM_RUG.x, BEDROOM_RUG.y, BEDROOM_RUG.w, BEDROOM_RUG.h, "#6A4545");
 
+  // Hallway
+  for (const sconce of HALLWAY_SCONCES) {
+    drawWallSconce(ctx, sconce.x, sconce.y);
+  }
+  for (const runner of HALLWAY_RUNNERS) {
+    drawHallwayRunner(ctx, runner.x, runner.y, runner.w);
+  }
+
   // Kitchen fixed furniture
+  for (const cabinet of KITCHEN_CABINETS_POS) {
+    drawWallCabinets(ctx, cabinet.x, cabinet.y);
+  }
+  drawHangingPots(ctx, KITCHEN_POTS_POS.x, KITCHEN_POTS_POS.y);
   drawFridge(ctx, FRIDGE_POS.x, FRIDGE_POS.y);
   drawCounter(ctx, COUNTER_POS.x, COUNTER_POS.y);
 
   // Bedroom
+  drawPoster(ctx, BEDROOM_POSTER_POS.x, BEDROOM_POSTER_POS.y, [
+    "#f59e0b",
+    "#ef4444",
+    "#22c55e",
+    "#8b5cf6",
+  ]);
+  drawMirror(ctx, BEDROOM_MIRROR_POS.x, BEDROOM_MIRROR_POS.y);
   drawTV(ctx, TV_POS.x, TV_POS.y, frame);
   drawLamp(ctx, LAMP_POS.x, LAMP_POS.y);
   drawNightstand(ctx, NIGHTSTAND_POS.x, NIGHTSTAND_POS.y);
@@ -1002,6 +1245,11 @@ export function collectFurnitureDrawables(
   drawables.push({ y: MEETING_TABLE_POS.y, draw: () => drawMeetingTable(ctx, MEETING_TABLE_POS.x, MEETING_TABLE_POS.y) });
   drawables.push({ y: DINING_TABLE_POS.y, draw: () => drawDiningTable(ctx, DINING_TABLE_POS.x, DINING_TABLE_POS.y) });
   drawables.push({ y: STOVE_DRAW_POS.y, draw: () => drawStove(ctx, STOVE_DRAW_POS.x, STOVE_DRAW_POS.y, activeCookers.size > 0) });
+  drawables.push({ y: OFFICE_CABINET_POS.y, draw: () => drawFileCabinet(ctx, OFFICE_CABINET_POS.x, OFFICE_CABINET_POS.y) });
+  drawables.push({ y: MEETING_RACK_POS.y, draw: () => drawServerRack(ctx, MEETING_RACK_POS.x, MEETING_RACK_POS.y) });
+  drawables.push({ y: MEETING_CREDENZA_POS.y, draw: () => drawCredenza(ctx, MEETING_CREDENZA_POS.x, MEETING_CREDENZA_POS.y) });
+  drawables.push({ y: KITCHEN_PANTRY_POS.y, draw: () => drawPantry(ctx, KITCHEN_PANTRY_POS.x, KITCHEN_PANTRY_POS.y) });
+  drawables.push({ y: BEDROOM_WARDROBE_POS.y, draw: () => drawWardrobe(ctx, BEDROOM_WARDROBE_POS.x, BEDROOM_WARDROBE_POS.y) });
 
   for (const bed of BED_SLOTS) {
     drawables.push({ y: bed.y, draw: () => drawBed(ctx, bed.x, bed.y) });

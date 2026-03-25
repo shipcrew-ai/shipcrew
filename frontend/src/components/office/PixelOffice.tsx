@@ -1,7 +1,13 @@
 "use client";
-import { useEffect, useRef, useCallback } from "react";
+import {
+  useEffect,
+  useRef,
+  useCallback,
+  useState,
+  type CSSProperties,
+} from "react";
 import { useAppStore } from "@/store";
-import type { Agent } from "@devteam/shared";
+import type { Agent, Channel } from "@devteam/shared";
 import {
   TILE,
   CANVAS_W,
@@ -37,6 +43,7 @@ import {
   drawStatusDot,
   drawNeedsBar,
   loadOfficeAssets,
+  withAlpha,
   type Drawable,
   type OfficeAssets,
 } from "./sprites";
@@ -89,6 +96,100 @@ interface ClickRegion {
   x: number; y: number; w: number; h: number;
   type: "agent" | "monitor" | "whiteboard";
   id: string;
+}
+
+interface HoverCard {
+  key: string;
+  title: string;
+  subtitle: string;
+  color: string;
+  type: ClickRegion["type"];
+}
+
+interface Ripple {
+  id: number;
+  x: number;
+  y: number;
+  color: string;
+}
+
+function regionKey(region: ClickRegion): string {
+  return `${region.type}:${region.id}`;
+}
+
+function regionColor(region: ClickRegion, agents: Agent[]): string {
+  if (region.type === "whiteboard") return "#f59e0b";
+  if (region.type === "monitor") {
+    return agents.find((agent) => agent.id === region.id)?.color ?? "#38bdf8";
+  }
+  return agents.find((agent) => agent.id === region.id)?.color ?? "#f8fafc";
+}
+
+function describeRegion(
+  region: ClickRegion,
+  agents: Agent[],
+  channels: Channel[],
+): HoverCard {
+  if (region.type === "agent") {
+    const agent = agents.find((item) => item.id === region.id);
+    return {
+      key: regionKey(region),
+      title: agent ? `${agent.avatar} ${agent.name}` : "Agent",
+      subtitle: agent ? `${agent.title} · click to inspect` : "Click to inspect",
+      color: agent?.color ?? "#f8fafc",
+      type: region.type,
+    };
+  }
+
+  if (region.type === "monitor") {
+    const agent = agents.find((item) => item.id === region.id);
+    const targetChannel = agent
+      ? channels.find((channel) => agent.channels.includes(channel.name))
+      : null;
+    return {
+      key: regionKey(region),
+      title: agent ? `${agent.name}'s desk` : "Desk monitor",
+      subtitle: `Open ${targetChannel ? `#${targetChannel.name}` : "#general"} chat`,
+      color: agent?.color ?? "#38bdf8",
+      type: region.type,
+    };
+  }
+
+  return {
+    key: regionKey(region),
+    title: "Task board",
+    subtitle: "Open planning and assignments",
+    color: "#f59e0b",
+    type: region.type,
+  };
+}
+
+function drawRegionHighlight(
+  ctx: CanvasRenderingContext2D,
+  region: ClickRegion,
+  frame: number,
+  color: string,
+  emphasis = 1,
+) {
+  const pad = region.type === "agent" ? 4 + emphasis : 3 + emphasis;
+  const pulse = 0.08 + ((Math.sin(frame * 0.12) + 1) / 2) * 0.16;
+  const x = region.x - pad;
+  const y = region.y - pad;
+  const w = region.w + pad * 2;
+  const h = region.h + pad * 2;
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = emphasis > 1 ? 2 : 1;
+  ctx.fillStyle = withAlpha(color, Math.min(0.24, pulse + emphasis * 0.03));
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeRect(x, y, w, h);
+  ctx.fillStyle = withAlpha(color, 0.85);
+  ctx.fillRect(x - 1, y - 1, 3, 3);
+  ctx.fillRect(x + w - 2, y - 1, 3, 3);
+  ctx.fillRect(x - 1, y + h - 2, 3, 3);
+  ctx.fillRect(x + w - 2, y + h - 2, 3, 3);
+  ctx.restore();
 }
 
 function tileOf(px: number): number {
@@ -170,25 +271,50 @@ function navigateTo(st: AgentState, tx: number, ty: number) {
 // ═══════════════════════════════════════════════════════════
 
 export function PixelOffice() {
+  const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const agentsRef = useRef<Agent[]>([]);
+  const channelsRef = useRef<Channel[]>([]);
   const statesRef = useRef<Map<string, AgentState>>(new Map());
   const clickRegionsRef = useRef<ClickRegion[]>([]);
   const frameRef = useRef(0);
   const assetsRef = useRef<OfficeAssets>({ cats: null, plants: null, flowers: null, sofa: null });
+  const hoveredRegionKeyRef = useRef<string | null>(null);
+  const selectedAgentIdRef = useRef<string | null>(null);
+  const rippleTimeoutsRef = useRef<number[]>([]);
 
   const agents = useAppStore((s) => s.agents);
+  const selectedAgentId = useAppStore((s) => s.selectedAgentId);
   const setSelectedAgentId = useAppStore((s) => s.setSelectedAgentId);
   const setChatPanelOpen = useAppStore((s) => s.setChatPanelOpen);
   const setActiveChannelId = useAppStore((s) => s.setActiveChannelId);
   const setTaskBoardPanelOpen = useAppStore((s) => s.setTaskBoardPanelOpen);
   const channels = useAppStore((s) => s.channels);
+  const [hoverCard, setHoverCard] = useState<HoverCard | null>(null);
+  const [ripples, setRipples] = useState<Ripple[]>([]);
 
   useEffect(() => { agentsRef.current = agents; }, [agents]);
+  useEffect(() => { channelsRef.current = channels; }, [channels]);
+  useEffect(() => { selectedAgentIdRef.current = selectedAgentId; }, [selectedAgentId]);
 
   // Load sprite assets
   useEffect(() => {
     loadOfficeAssets().then((a) => { assetsRef.current = a; });
+  }, []);
+
+  useEffect(() => {
+    const hoveredKey = hoveredRegionKeyRef.current;
+    if (!hoveredKey) return;
+    const region = clickRegionsRef.current.find((item) => regionKey(item) === hoveredKey);
+    if (region) {
+      setHoverCard(describeRegion(region, agents, channels));
+    }
+  }, [agents, channels]);
+
+  useEffect(() => {
+    return () => {
+      rippleTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    };
   }, []);
 
   // Coordinate mapping (object-fit: contain)
@@ -206,17 +332,53 @@ export function PixelOffice() {
     };
   }, []);
 
+  const setStagePointer = useCallback((x: number, y: number) => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    stage.style.setProperty("--pan-x", `${(((x / CANVAS_W) - 0.5) * 18).toFixed(2)}px`);
+    stage.style.setProperty("--pan-y", `${(((y / CANVAS_H) - 0.5) * 14).toFixed(2)}px`);
+    stage.style.setProperty("--hover-x", `${((x / CANVAS_W) * 100).toFixed(2)}%`);
+    stage.style.setProperty("--hover-y", `${((y / CANVAS_H) * 100).toFixed(2)}%`);
+  }, []);
+
+  const clearStagePointer = useCallback(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    stage.style.setProperty("--pan-x", "0px");
+    stage.style.setProperty("--pan-y", "0px");
+    stage.style.setProperty("--hover-x", "50%");
+    stage.style.setProperty("--hover-y", "50%");
+  }, []);
+
+  const spawnRipple = useCallback((x: number, y: number, color: string) => {
+    const id = Date.now() + Math.random();
+    setRipples((current) => [
+      ...current.slice(-2),
+      { id, x: (x / CANVAS_W) * 100, y: (y / CANVAS_H) * 100, color },
+    ]);
+
+    const timeoutId = window.setTimeout(() => {
+      setRipples((current) => current.filter((ripple) => ripple.id !== id));
+      rippleTimeoutsRef.current = rippleTimeoutsRef.current.filter(
+        (activeTimeoutId) => activeTimeoutId !== timeoutId,
+      );
+    }, 700);
+
+    rippleTimeoutsRef.current.push(timeoutId);
+  }, []);
+
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       const { x, y } = canvasToPixel(e);
       for (const r of clickRegionsRef.current) {
         if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) {
+          spawnRipple(x, y, regionColor(r, agentsRef.current));
           if (r.type === "agent") setSelectedAgentId(r.id);
           else if (r.type === "monitor") {
             const agent = agentsRef.current.find((a) => a.id === r.id);
             if (agent) {
-              const ch = channels.find((c) => agent.channels.includes(c.name));
-              const general = channels.find((c) => c.name === "general");
+              const ch = channelsRef.current.find((c) => agent.channels.includes(c.name));
+              const general = channelsRef.current.find((c) => c.name === "general");
               const target = ch || general;
               if (target) setActiveChannelId(target.id);
               setChatPanelOpen(true);
@@ -226,18 +388,46 @@ export function PixelOffice() {
         }
       }
     },
-    [canvasToPixel, channels, setSelectedAgentId, setChatPanelOpen, setActiveChannelId, setTaskBoardPanelOpen],
+    [
+      canvasToPixel,
+      setSelectedAgentId,
+      setChatPanelOpen,
+      setActiveChannelId,
+      setTaskBoardPanelOpen,
+      spawnRipple,
+    ],
   );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       const { x, y } = canvasToPixel(e);
-      const hit = clickRegionsRef.current.some(
+      setStagePointer(x, y);
+
+      const hit = clickRegionsRef.current.find(
         (r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h,
       );
-      document.body.style.cursor = hit ? "pointer" : "auto";
+
+      e.currentTarget.style.cursor = hit ? "pointer" : "auto";
+
+      const nextKey = hit ? regionKey(hit) : null;
+      if (nextKey === hoveredRegionKeyRef.current) return;
+
+      hoveredRegionKeyRef.current = nextKey;
+      setHoverCard(
+        hit ? describeRegion(hit, agentsRef.current, channelsRef.current) : null,
+      );
     },
-    [canvasToPixel],
+    [canvasToPixel, setStagePointer],
+  );
+
+  const handleMouseLeave = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      hoveredRegionKeyRef.current = null;
+      setHoverCard(null);
+      e.currentTarget.style.cursor = "auto";
+      clearStagePointer();
+    },
+    [clearStagePointer],
   );
 
   // ── Render loop ──
@@ -490,6 +680,34 @@ export function PixelOffice() {
       drawables.sort((a, b) => a.y - b.y);
       for (const d of drawables) d.draw();
 
+      const selectedId = selectedAgentIdRef.current;
+      const selectedRegion = selectedId
+        ? regions.find((region) => region.type === "agent" && region.id === selectedId)
+        : null;
+      if (selectedRegion) {
+        const selectedAgent = agents.find((agent) => agent.id === selectedRegion.id);
+        drawRegionHighlight(
+          ctx,
+          selectedRegion,
+          frame,
+          selectedAgent?.color ?? "#f8fafc",
+          2,
+        );
+      }
+
+      const hoveredKey = hoveredRegionKeyRef.current;
+      if (hoveredKey) {
+        const hoveredRegion = regions.find((region) => regionKey(region) === hoveredKey);
+        if (hoveredRegion && (!selectedRegion || regionKey(selectedRegion) !== hoveredKey)) {
+          drawRegionHighlight(
+            ctx,
+            hoveredRegion,
+            frame,
+            regionColor(hoveredRegion, agents),
+          );
+        }
+      }
+
       clickRegionsRef.current = regions;
       animId = requestAnimationFrame(render);
     }
@@ -497,19 +715,68 @@ export function PixelOffice() {
     render();
     return () => {
       cancelAnimationFrame(animId);
-      document.body.style.cursor = "auto";
+      if (canvasRef.current) canvasRef.current.style.cursor = "auto";
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={CANVAS_W}
-      height={CANVAS_H}
-      onClick={handleClick}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => { document.body.style.cursor = "auto"; }}
-      className="pixel-canvas"
-    />
+    <div
+      ref={stageRef}
+      className="pixel-office-stage"
+      style={
+        {
+          "--pan-x": "0px",
+          "--pan-y": "0px",
+          "--hover-x": "50%",
+          "--hover-y": "50%",
+        } as CSSProperties
+      }
+    >
+      <canvas
+        ref={canvasRef}
+        width={CANVAS_W}
+        height={CANVAS_H}
+        onClick={handleClick}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="pixel-canvas pixel-office-canvas"
+        aria-label="Interactive pixel office"
+      />
+
+      {hoverCard && (
+        <div
+          className="office-tooltip pointer-events-none"
+          style={
+            {
+              left: "var(--hover-x)",
+              top: "var(--hover-y)",
+              "--office-tooltip-tone": hoverCard.color,
+            } as CSSProperties
+          }
+        >
+          <p className="text-[9px] uppercase tracking-[0.24em] text-white/45">
+            {hoverCard.type}
+          </p>
+          <p className="mt-1 text-xs font-semibold text-white">{hoverCard.title}</p>
+          <p className="mt-1 text-[11px] leading-4 text-white/65">
+            {hoverCard.subtitle}
+          </p>
+        </div>
+      )}
+
+      {ripples.map((ripple) => (
+        <span
+          key={ripple.id}
+          className="office-ripple"
+          style={
+            {
+              left: `${ripple.x}%`,
+              top: `${ripple.y}%`,
+              "--office-ripple-color": ripple.color,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </div>
   );
 }
